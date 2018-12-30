@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Melt the clck</title>
+    <meta charset="utf-8">
+    <meta name="author" content="  Earo Wang     @earowang" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="libs/remark.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Melt the cl<i class='far fa-clock' style='font-size:52px'></i>ck
+## tidy time series analysis
+<hr>
+### <br> Earo Wang <br> <i class='fab fa-twitter' style='color:#6CADDE'></i> <i class='fab fa-github'></i> <span class="citation">@earowang</span>
+### slides at <a href="https://slides.earo.me/rstudioconf19">slides.earo.me/rstudioconf19</a>
+
+---
+
+
+
+
+
+
+## Today we'll learn
+
+.center[
+### 1 unified tidy time series workflow ‼️
+]
+&lt;br&gt;
+
+.pull-left[
+### 2 packages 📦
+.center[
+&lt;img src="img/tsibble.png" height=180px&gt;
+&lt;img src="img/fable.png" height=180px&gt;
+]
+]
+.pull-right[
+### 3 big ideas 💡
+1. tsibble
+2. mable
+3. fable
+]
+
+???
+
+I'll explain three big ideas or tibbles both abstractly and concretely with
+data examples.
+
+---
+
+## tidy data workflow
+
+.center[
+![](img/r4ds.svg)
+]
+
+The underlying data structure: tibble
+
+---
+
+## current time series workflow
+
+.center[
+![](img/r4ts.svg)
+]
+
+The mésalliance between temporal data and time series models
+
+---
+
+## tidy time series workflow
+
+.center[
+![](img/r4tidyverts.svg)
+]
+
+The underlying data structure: tsibble
+
+---
+
+## Why fable?
+
+&gt; 1. It makes forecasting tables.
+&gt; 2. A fable is never true, but it tells you something important about reality.
+&gt;
+&gt; **Rob J Hyndman**
+
+---
+
+## Map and roll
+
+.left-column[
+&lt;br&gt;
+&lt;br&gt;
+![purrr-logo](https://raw.githubusercontent.com/rstudio/hex-stickers/master/PNG/purrr.png)
+]
+
+--
+
+.right-column[
+&lt;div style="width:100%;height:0;padding-bottom:64%;position:relative;"&gt;&lt;iframe src="https://giphy.com/embed/xoSaxIp8f9JPa" width="100%" height="100%" style="position:absolute" frameBorder="0" class="giphy-embed" allowFullScreen&gt;&lt;/iframe&gt;&lt;/div&gt;&lt;p&gt;&lt;a href="https://giphy.com/gifs/cat-rolls-xoSaxIp8f9JPa"&gt;&lt;/a&gt;&lt;/p&gt;
+]
+
+---
+
+class: inverse middle center
+
+### Slides created via xaringan ⚔️ [slides.earo.me/rstudioconf19](https://slides.earo.me/rstudioconf19)
+
+### Open source [github.com/earowang/rstudioconf19](https://github.com/earowang/rstudioconf19)
+
+### This work is under licensed [&lt;i class="fab fa-creative-commons"&gt;&lt;/i&gt; BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/).
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
