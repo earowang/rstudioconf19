@@ -88,12 +88,43 @@ The underlying data structure: tsibble
 
 ---
 
+# AU energy consumption
+
+---
+class: inverse middle center
+
+.animated.bounce[
+<img src="img/tsibble.png" height=280px>
+]
+
+## Yet another data standard
+
+---
+
+## Time series has its own semantics
+
+---
+class: inverse middle center
+
+.animated.bounce[
+<img src="img/fable.png" height=280px>
+]
+
+## Tidy forecasting
+
+---
+
 ## Why fable?
 
 > 1. It makes forecasting tables.
 > 2. A fable is never true, but it tells you something important about reality.
 >
 > **Rob J Hyndman**
+
+---
+
+# New generic `model()`
+
 
 ---
 
@@ -112,11 +143,22 @@ The underlying data structure: tsibble
 ]
 
 ---
+class: middle center
 
-class: inverse middle center
-
-### Slides created via xaringan `r emo::ji("crossed_swords")` [slides.earo.me/rstudioconf19](https://slides.earo.me/rstudioconf19)
-
-### Open source [github.com/earowang/rstudioconf19](https://github.com/earowang/rstudioconf19)
-
-### This work is under licensed [<i class="fab fa-creative-commons"></i> BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/).
+.card[
+![](img/tsibble.png)
+[pkg.earo.me/tsibble](https://pkg.earo.me/tsibble)
+]
+.card[
+![](img/fable.png)
+[github.com/tidyverts/fable](https://github.com/tidyverts/fable)
+]
+<br>
+.card[
+![](img/slides-title.png)
+[slides.earo.me/rstudioconf19](https://slides.earo.me/rstudioconf19)
+]
+.card[
+![](img/Octocat.png)
+[github.com/earowang/rstudioconf19](https://github.com/earowang/rstudioconf19)
+]

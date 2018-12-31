@@ -4,6 +4,7 @@
 @import url('https://fonts.googleapis.com/css?family=PT+Sans+Narrow');
 @import url(https://fonts.googleapis.com/css?family=Source+Code+Pro:400,500,600);
 @import url("https://use.fontawesome.com/releases/v5.2.0/css/all.css");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css");
 
 body {
   font-family: 'Assistant', sans-serif;
@@ -97,7 +98,7 @@ code {
   background: #f8f8f8;
   border-radius: 5px;
 }
-.remark-code, .remark-inline-code { font-family: 'Source Code Pro'; font-size: 70%; }
+.remark-code, .remark-inline-code { font-family: 'Source Code Pro'; font-size: 78%; }
 .remark-code, .remark-code-line { font-family: 'Source Code Pro'; font-size: 88%; }
 .remark-code-line-highlighted {
   background-color: #fee8c8;
@@ -217,4 +218,25 @@ blockquote:before {
   line-height: 0.1em;
   margin-right: 0.25em;
   vertical-align: -0.4em;
+}
+
+.card {
+  display: inline-block;
+  background: #fff;
+  box-shadow: 0 2px 4px 0 #00000033;
+  transition: all 0.2s ease-out;
+  margin: 10px;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 22px;
+  padding: 5px;
+  font-weight: 900;
+}
+
+.card img {
+  display: block;
+  padding-bottom: 10px;
+  height: 180px;
+  margin-left: auto;
+  margin-right: auto;
 }
