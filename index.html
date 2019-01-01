@@ -93,7 +93,6 @@ The underlying data structure: tsibble
 #&gt; 2     8143667 2013-04-03 08:00:00         0
 #&gt; 3     8143667 2013-04-03 08:30:00         0
 #&gt; 4     8143667 2013-04-03 09:00:00         0
-#&gt; 5     8143667 2013-04-03 09:30:00         0
 #&gt; # … with 4.61e+07 more rows, and 5 more
 #&gt; #   variables: general_supply_kwh &lt;dbl&gt;,
 #&gt; #   controlled_load_kwh &lt;int&gt;,
@@ -101,7 +100,7 @@ The underlying data structure: tsibble
 #&gt; #   net_generation_kwh &lt;int&gt;, other_kwh &lt;int&gt;
 ```
 
-.footnote[[data sourced from Department of the Environment and Energy, AU](https://data.gov. au/dataset/4e21dea3-9b87-4610-94c7-15a8a77907ef)]
+.footnote[[Data source: Department of the Environment and Energy, Australia](https://data.gov. au/dataset/4e21dea3-9b87-4610-94c7-15a8a77907ef)]
 
 ---
 class: inverse middle center
@@ -120,8 +119,8 @@ class: inverse middle center
 ```r
 elec_ts &lt;- elec_tbl %&gt;% 
   as_tsibble(
-*   key = id(customer_id),
-*   index = reading_datetime
+    key = id(customer_id),
+    index = reading_datetime
   )
 ```
 
@@ -231,6 +230,21 @@ Parallel processing prefix: `future_*`.
 ]
 
 ---
+
+## A simple example
+
+
+```r
+elec_ma &lt;- elec_avg %&gt;% 
+  mutate(
+    ma_kwh24 = slide_dbl(avg_kwh, ~ mean(.x), .size = 24, .align = "cl"),
+    ma_kwh720 = slide_dbl(avg_kwh, ~ mean(.x), .size = 720, .align = "cl"),
+  ) 
+```
+
+&lt;img src="figure/moving-average-plot-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
 class: inverse middle center
 
 .animated.bounce[
@@ -250,31 +264,156 @@ class: inverse middle center
 
 ---
 
+.right-column[
+
+
+&lt;img src="figure/calendar-train-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
 ## New generic `model()`: mable
+
+
+```r
+elec_mbl &lt;- elec_jan %&gt;% 
+  model(naive = NAIVE(avg_kwh), ets = ETS(avg_kwh)) %&gt;%
+  print()
+```
+
+```
+#&gt; # A mable: 1 model
+#&gt;   naive   ets       
+#&gt;   &lt;model&gt; &lt;model&gt;   
+#&gt; 1 NAIVE   ETS(M,N,M)
+```
 
 ---
 
 ## Sweep mable
 
+
+```r
+tidy(elec_mbl)
+```
+
+```
+#&gt; Error: All nested columns must have the same number of elements.
+```
+
+```r
+glance(elec_mbl)
+```
+
+```
+#&gt; Error: Each column must either be a list of vectors or a list of data frames [key]
+```
+
+```r
+augment(elec_mbl)
+```
+
+```
+#&gt; # A tsibble: 1,440 x 5 [1h] &lt;UTC&gt;
+#&gt; # Key:       .model [2]
+#&gt;   .model datetime            avg_kwh .fitted
+#&gt;   &lt;chr&gt;  &lt;dttm&gt;                &lt;dbl&gt;   &lt;dbl&gt;
+#&gt; 1 naive  2013-01-01 00:00:00   0.251  NA    
+#&gt; 2 naive  2013-01-01 01:00:00   0.221   0.251
+#&gt; 3 naive  2013-01-01 02:00:00   0.196   0.221
+#&gt; 4 naive  2013-01-01 03:00:00   0.182   0.196
+#&gt; # … with 1,436 more rows, and 1 more variable:
+#&gt; #   .resid &lt;dbl&gt;
+```
+
 ---
 
 ## Yet still `forecast()`: fable
+
+
+```r
+elec_fbl &lt;- elec_mbl %&gt;% 
+  forecast(h = 24) %&gt;% 
+  print()
+```
+
+```
+#&gt; # A fable: 48 x 4 [1h] &lt;UTC&gt;
+#&gt; # Key:     .model [2]
+#&gt;   .model datetime            avg_kwh .distribution
+#&gt;   &lt;chr&gt;  &lt;dttm&gt;                &lt;dbl&gt; &lt;dist&gt;       
+#&gt; 1 naive  2013-01-31 00:00:00   0.216 N(0.22, 0.00…
+#&gt; 2 naive  2013-01-31 01:00:00   0.216 N(0.22, 0.00…
+#&gt; 3 naive  2013-01-31 02:00:00   0.216 N(0.22, 0.00…
+#&gt; 4 naive  2013-01-31 03:00:00   0.216 N(0.22, 0.00…
+#&gt; # … with 44 more rows
+```
 
 ---
 
 ## Visualise fable
 
+.pull-left[
+&lt;img src="figure/vis-naive-1.svg" style="display: block; margin: auto;" /&gt;
+]
+.pull-right[
+&lt;img src="figure/vis-ets-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
 ---
 
 ## Assess model performance
+
+
+```r
+accuracy(elec_fbl, elec_jan31)
+```
+
+```
+#&gt; Error: Unknown column `.actual`
+```
 
 ---
 
 ## Models are fundamentally scalable
 
+
+```r
+elec_ts %&gt;% 
+  group_by(customer_id) %&gt;% 
+  fill_gaps(avg_kwh = mean(avg_kwh)) %&gt;% 
+  model(arima = ARIMA(avg_kwh), ets = ETS(avg_kwh)) %&gt;%
+  forecast(h = 24)
+```
+
+---
+
+## People behind the tidyverts
+
+.center[
+.portrait[
+![](http://dicook.org/img/dicook-2014.jpg)
+Di Cook &lt;br&gt;
+&lt;i class='fab fa-twitter' style='color:#6CADDE'&gt;&lt;/i&gt; [@visnut](http://twitter.com/visnut)
+]
+.portrait[
+![](https://robjhyndman.com/pics/RobHyndman-highres.jpg)
+Rob J Hyndman &lt;br&gt;
+&lt;i class='fab fa-twitter' style='color:#6CADDE'&gt;&lt;/i&gt; [@robjhyndman](http://twitter.com/robjhyndman)
+]
+.portrait[
+![](https://d33wubrfki0l68.cloudfront.net/362995d299699959fe385c344e24331f9c0b256c/ecdb4/img/circle.jpg)
+Mitchell O'Hara‑Wild &lt;br&gt;
+&lt;i class='fab fa-twitter' style='color:#6CADDE'&gt;&lt;/i&gt; [@mitchoharawild](http://twitter.com/mitchoharawild)
+]
+]
+
 ---
 class: middle center
 
+.card[
+.tidyverts[tidyver.orange[ts].org]
+]
 .card[
 ![](img/tsibble.png)
 [pkg.earo.me/tsibble](https://pkg.earo.me/tsibble)

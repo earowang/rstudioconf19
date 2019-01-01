@@ -10,8 +10,8 @@ elec_tbl
 ## ---- coerce
 elec_ts <- elec_tbl %>% 
   as_tsibble(
-    key = id(customer_id), #<<
-    index = reading_datetime #<<
+    key = id(customer_id),
+    index = reading_datetime
   )
 
 ## ---- print
@@ -136,20 +136,87 @@ window_tbl %>%
 #   locations = cells_data()
 # )
 
+## ---- moving-average
+elec_ma <- elec_avg %>% 
+  mutate(
+    ma_kwh24 = slide_dbl(avg_kwh, ~ mean(.x), .size = 24, .align = "cl"),
+    ma_kwh720 = slide_dbl(avg_kwh, ~ mean(.x), .size = 720, .align = "cl"),
+  ) 
+
+## ---- moving-average-plot
+elec_ma %>% 
+  ggplot(aes(x = datetime)) +
+  geom_point(aes(y = avg_kwh), color = "grey60", size = 0.1, alpha = 0.6) +
+  geom_line(aes(y = ma_kwh24), color = "#7570b3", size = 1.2) +
+  geom_line(aes(y = ma_kwh720), color = "#d95f02", size = 1.2)
+
 ## ---- split-data
 library(fable)
 elec_jan <- elec_avg %>% 
-  filter_index(~ "2013-01-30")
+  filter_index(~ "2013-01-30") %>% 
+  mutate(date = as_date(datetime), hour = hour(datetime))
 elec_jan31 <- elec_avg %>% 
   filter_index("2013-01-31")
 
+## ---- calendar-train
+elec_jan %>% 
+  ggplot(aes(x = hour, y = avg_kwh)) +
+  geom_line() +
+  sugrrants::facet_calendar(~ date) +
+  theme_remark()
+
+## ----- model
 elec_mbl <- elec_jan %>% 
-  model(naive = NAIVE(avg_kwh), est = ETS(avg_kwh)) %>%
+  model(naive = NAIVE(avg_kwh), ets = ETS(avg_kwh)) %>%
   print()
 
-elec_fc <- elec_mbl %>% 
+## ---- sweep
+tidy(elec_mbl)
+glance(elec_mbl)
+augment(elec_mbl)
+
+## ---- forecast
+elec_fbl <- elec_mbl %>% 
   forecast(h = 24) %>% 
   print()
 
-autoplot(elec_fc, data = elec_jan)
-accuracy(elec_fc, elec_jan31)
+## ---- vis-naive
+# autoplot(elec_fbl, data = elec_jan)
+elec_ftf <- elec_fbl %>% 
+  fortify() %>% 
+  filter(.model == "naive") %>% 
+  mutate(date = as_date(datetime), hour = hour(datetime))
+elec_jan %>% 
+  ggplot(aes(x = hour, y = avg_kwh)) +
+  geom_line() +
+  geom_forecast(
+    aes(ymin = lower, ymax = upper, level = level),
+    elec_ftf, stat = "identity"
+  ) +
+  sugrrants::facet_calendar(~ date) +
+  theme_remark()
+
+## ---- vis-ets
+elec_ftf <- elec_fbl %>% 
+  fortify() %>% 
+  filter(.model == "ets") %>% 
+  mutate(date = as_date(datetime), hour = hour(datetime))
+elec_jan %>% 
+  ggplot(aes(x = hour, y = avg_kwh)) +
+  geom_line() +
+  geom_forecast(
+    aes(ymin = lower, ymax = upper, level = level),
+    elec_ftf, stat = "identity"
+  ) +
+  sugrrants::facet_calendar(~ date) +
+  theme_remark()
+
+## ----- accuracy
+accuracy(elec_fbl, elec_jan31)
+
+## ---- final
+elec_ts %>% 
+  group_by(customer_id) %>% 
+  fill_gaps(avg_kwh = mean(avg_kwh)) %>% 
+  model(arima = ARIMA(avg_kwh), ets = ETS(avg_kwh)) %>%
+  forecast(h = 24)

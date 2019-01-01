@@ -94,7 +94,7 @@ The underlying data structure: tsibble
 ```{r load}
 ```
 
-.footnote[[data sourced from Department of the Environment and Energy, AU](https://data.gov. au/dataset/4e21dea3-9b87-4610-94c7-15a8a77907ef)]
+.footnote[[Data source: Department of the Environment and Energy, Australia](https://data.gov. au/dataset/4e21dea3-9b87-4610-94c7-15a8a77907ef)]
 
 ---
 class: inverse middle center
@@ -191,6 +191,16 @@ Parallel processing prefix: `future_*`.
 ]
 
 ---
+
+## A simple example
+
+```{r moving-average, echo = TRUE}
+```
+
+```{r moving-average-plot, fig.height = 3}
+```
+
+---
 class: inverse middle center
 
 .animated.bounce[
@@ -210,31 +220,90 @@ class: inverse middle center
 
 ---
 
+.right-column[
+```{r split-data}
+```
+
+```{r calendar-train}
+```
+]
+
+---
+
 ## New generic `model()`: mable
+
+```{r model, echo = TRUE}
+```
 
 ---
 
 ## Sweep mable
 
+```{r sweep, error = TRUE, echo = TRUE}
+```
+
 ---
 
 ## Yet still `forecast()`: fable
+
+```{r forecast, echo = TRUE}
+```
 
 ---
 
 ## Visualise fable
 
+.pull-left[
+```{r vis-naive, fig.height = 12}
+```
+]
+.pull-right[
+```{r vis-ets, fig.height = 12}
+```
+]
+
 ---
 
 ## Assess model performance
+
+```{r accuracy, echo = TRUE, error = TRUE}
+```
 
 ---
 
 ## Models are fundamentally scalable
 
+```{r final, eval = FALSE, echo = TRUE}
+```
+
+---
+
+## People behind the tidyverts
+
+.center[
+.portrait[
+![](http://dicook.org/img/dicook-2014.jpg)
+Di Cook <br>
+<i class='fab fa-twitter' style='color:#6CADDE'></i> [@visnut](http://twitter.com/visnut)
+]
+.portrait[
+![](https://robjhyndman.com/pics/RobHyndman-highres.jpg)
+Rob J Hyndman <br>
+<i class='fab fa-twitter' style='color:#6CADDE'></i> [@robjhyndman](http://twitter.com/robjhyndman)
+]
+.portrait[
+![](https://d33wubrfki0l68.cloudfront.net/362995d299699959fe385c344e24331f9c0b256c/ecdb4/img/circle.jpg)
+Mitchell O'Hara‑Wild <br>
+<i class='fab fa-twitter' style='color:#6CADDE'></i> [@mitchoharawild](http://twitter.com/mitchoharawild)
+]
+]
+
 ---
 class: middle center
 
+.card[
+.tidyverts[tidyver.orange[ts].org]
+]
 .card[
 ![](img/tsibble.png)
 [pkg.earo.me/tsibble](https://pkg.earo.me/tsibble)
