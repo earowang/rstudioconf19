@@ -52,7 +52,7 @@ data examples.
 
 ---
 
-## tidy data workflow
+## Tidy data workflow
 
 .center[
 ![](img/r4ds.svg)
@@ -62,7 +62,7 @@ The underlying data structure: tibble
 
 ---
 
-## current time series workflow
+## Current time series workflow ☹️
 
 .center[
 ![](img/r4ts.svg)
@@ -72,7 +72,7 @@ The mésalliance between temporal data and time series models
 
 ---
 
-## tidy time series workflow
+## Tidy time series workflow 😃
 
 .center[
 ![](img/r4tidyverts.svg)
@@ -82,7 +82,26 @@ The underlying data structure: tsibble
 
 ---
 
-# AU energy consumption
+# An example: electricity consumption
+
+
+```
+#&gt; # A tibble: 46,102,229 x 8
+#&gt;   customer_id reading_datetime    event_key
+#&gt;         &lt;int&gt; &lt;dttm&gt;                  &lt;int&gt;
+#&gt; 1     8143667 2013-04-03 07:30:00         0
+#&gt; 2     8143667 2013-04-03 08:00:00         0
+#&gt; 3     8143667 2013-04-03 08:30:00         0
+#&gt; 4     8143667 2013-04-03 09:00:00         0
+#&gt; 5     8143667 2013-04-03 09:30:00         0
+#&gt; # … with 4.61e+07 more rows, and 5 more
+#&gt; #   variables: general_supply_kwh &lt;dbl&gt;,
+#&gt; #   controlled_load_kwh &lt;int&gt;,
+#&gt; #   gross_generation_kwh &lt;int&gt;,
+#&gt; #   net_generation_kwh &lt;int&gt;, other_kwh &lt;int&gt;
+```
+
+.footnote[[data sourced from Department of the Environment and Energy, AU](https://data.gov. au/dataset/4e21dea3-9b87-4610-94c7-15a8a77907ef)]
 
 ---
 class: inverse middle center
@@ -96,6 +115,120 @@ class: inverse middle center
 ---
 
 ## Time series has its own semantics
+
+
+```r
+elec_ts &lt;- elec_tbl %&gt;% 
+  as_tsibble(
+*   key = id(customer_id),
+*   index = reading_datetime
+  )
+```
+
+* **key**:
+* **index**:
+
+---
+
+## Contextual pretty printing
+
+
+```
+*#&gt; # A tsibble: 46,102,229 x 8 [30m] &lt;UTC&gt;
+*#&gt; # Key:       customer_id [2,924]
+#&gt;   customer_id reading_datetime    event_key
+#&gt;         &lt;int&gt; &lt;dttm&gt;                  &lt;int&gt;
+#&gt; 1     8143667 2013-04-03 07:30:00         0
+#&gt; 2     8143667 2013-04-03 08:00:00         0
+#&gt; 3     8143667 2013-04-03 08:30:00         0
+#&gt; 4     8143667 2013-04-03 09:00:00         0
+#&gt; # … with 4.61e+07 more rows, and 5 more
+#&gt; #   variables: general_supply_kwh &lt;dbl&gt;,
+#&gt; #   controlled_load_kwh &lt;int&gt;,
+#&gt; #   gross_generation_kwh &lt;int&gt;,
+#&gt; #   net_generation_kwh &lt;int&gt;, other_kwh &lt;int&gt;
+```
+
+---
+
+## Look at data early
+
+&lt;img src="figure/line-na-1.svg" style="display: block; margin: auto;" /&gt;
+
+```r
+elec_ts %&gt;% fill_gaps()
+```
+
+&lt;img src="figure/fill-gaps-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Implicit missing value handlers
+
+&lt;br&gt;
+1. Check with `has_gaps()`
+2. Report with `scan_gaps()`
+3. Summarise with `count_gaps()`
+4. Fill in time gaps with `fill_gaps()`
+
+---
+
+## A new adjective `index_by()`
+
+
+```r
+elec_avg &lt;- elec_ts %&gt;% 
+* index_by(datetime = floor_date(reading_datetime, "hour")) %&gt;%
+  summarise(avg_kwh = mean(general_supply_kwh)) %&gt;% 
+  print()
+```
+
+```
+#&gt; # A tsibble: 8,760 x 2 [1h] &lt;UTC&gt;
+#&gt;   datetime            avg_kwh
+#&gt;   &lt;dttm&gt;                &lt;dbl&gt;
+#&gt; 1 2013-01-01 00:00:00   0.251
+#&gt; 2 2013-01-01 01:00:00   0.221
+#&gt; 3 2013-01-01 02:00:00   0.196
+#&gt; 4 2013-01-01 03:00:00   0.182
+#&gt; # … with 8,756 more rows
+```
+
+---
+
+## Map and roll
+
+.left-column[
+&lt;br&gt;
+&lt;br&gt;
+![purrr-logo](https://raw.githubusercontent.com/rstudio/hex-stickers/master/PNG/purrr.png)
+]
+
+--
+
+.right-column[
+&lt;div style="width:100%;height:0;padding-bottom:64%;position:relative;"&gt;&lt;iframe src="https://giphy.com/embed/xoSaxIp8f9JPa" width="100%" height="100%" style="position:absolute" frameBorder="0" class="giphy-embed" allowFullScreen&gt;&lt;/iframe&gt;&lt;/div&gt;&lt;p&gt;&lt;a href="https://giphy.com/gifs/cat-rolls-xoSaxIp8f9JPa"&gt;&lt;/a&gt;&lt;/p&gt;
+]
+
+---
+
+
+
+.pull-left[
+slide
+![](img/slide.gif)
+tile
+![](img/tile.gif)
+stretch
+![](img/stretch.gif)
+]
+.pull-right[
+&lt;br&gt;
+&lt;img src="img/window.png"&gt;
+Type stability suffix: `*_dbl()`, `*_int()`, `*_lgl()`, `*_chr()`
+
+Parallel processing prefix: `future_*`.
+]
 
 ---
 class: inverse middle center
@@ -117,24 +250,27 @@ class: inverse middle center
 
 ---
 
-# New generic `model()`
-
+## New generic `model()`: mable
 
 ---
 
-## Map and roll
+## Sweep mable
 
-.left-column[
-&lt;br&gt;
-&lt;br&gt;
-![purrr-logo](https://raw.githubusercontent.com/rstudio/hex-stickers/master/PNG/purrr.png)
-]
+---
 
---
+## Yet still `forecast()`: fable
 
-.right-column[
-&lt;div style="width:100%;height:0;padding-bottom:64%;position:relative;"&gt;&lt;iframe src="https://giphy.com/embed/xoSaxIp8f9JPa" width="100%" height="100%" style="position:absolute" frameBorder="0" class="giphy-embed" allowFullScreen&gt;&lt;/iframe&gt;&lt;/div&gt;&lt;p&gt;&lt;a href="https://giphy.com/gifs/cat-rolls-xoSaxIp8f9JPa"&gt;&lt;/a&gt;&lt;/p&gt;
-]
+---
+
+## Visualise fable
+
+---
+
+## Assess model performance
+
+---
+
+## Models are fundamentally scalable
 
 ---
 class: middle center

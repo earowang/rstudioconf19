@@ -17,7 +17,7 @@ output:
 
 ```{r initial, echo = FALSE, cache = FALSE, results = 'hide'}
 library(knitr)
-options(htmltools.dir.version = FALSE, tibble.width = 60, tibble.print_min = 6)
+options(htmltools.dir.version = FALSE, tibble.width = 50, tibble.print_min = 4)
 opts_chunk$set(
   echo = FALSE, warning = FALSE, message = FALSE, comment = "#>",
   fig.path = 'figure/', cache.path = 'cache/', fig.align = 'center', 
@@ -25,6 +25,7 @@ opts_chunk$set(
   cache = TRUE, external = TRUE, dev = 'svglite'
 )
 read_chunk('R/theme.R')
+read_chunk('R/main.R')
 ```
 
 ```{r theme-remark}
@@ -58,7 +59,7 @@ data examples.
 
 ---
 
-## tidy data workflow
+## Tidy data workflow
 
 .center[
 ![](img/r4ds.svg)
@@ -68,7 +69,7 @@ The underlying data structure: tibble
 
 ---
 
-## current time series workflow
+## Current time series workflow `r emo::ji("frowning_face")`
 
 .center[
 ![](img/r4ts.svg)
@@ -78,7 +79,7 @@ The mésalliance between temporal data and time series models
 
 ---
 
-## tidy time series workflow
+## Tidy time series workflow `r emo::ji("smiley")`
 
 .center[
 ![](img/r4tidyverts.svg)
@@ -88,7 +89,12 @@ The underlying data structure: tsibble
 
 ---
 
-# AU energy consumption
+# An example: electricity consumption
+
+```{r load}
+```
+
+.footnote[[data sourced from Department of the Environment and Energy, AU](https://data.gov. au/dataset/4e21dea3-9b87-4610-94c7-15a8a77907ef)]
 
 ---
 class: inverse middle center
@@ -102,6 +108,87 @@ class: inverse middle center
 ---
 
 ## Time series has its own semantics
+
+```{r coerce, echo = TRUE}
+```
+
+* **key**:
+* **index**:
+
+---
+
+## Contextual pretty printing
+
+```{r print, highlight.output = 1:2}
+```
+
+---
+
+## Look at data early
+
+```{r line-na, fig.height = 2.3}
+```
+
+```r
+elec_ts %>% fill_gaps()
+```
+
+```{r fill-gaps, fig.height = 2.3}
+```
+
+---
+
+## Implicit missing value handlers
+
+<br>
+1. Check with `has_gaps()`
+2. Report with `scan_gaps()`
+3. Summarise with `count_gaps()`
+4. Fill in time gaps with `fill_gaps()`
+
+---
+
+## A new adjective `index_by()`
+
+```{r index-by, echo = TRUE}
+```
+
+---
+
+## Map and roll
+
+.left-column[
+<br>
+<br>
+![purrr-logo](https://raw.githubusercontent.com/rstudio/hex-stickers/master/PNG/purrr.png)
+]
+
+--
+
+.right-column[
+<div style="width:100%;height:0;padding-bottom:64%;position:relative;"><iframe src="https://giphy.com/embed/xoSaxIp8f9JPa" width="100%" height="100%" style="position:absolute" frameBorder="0" class="giphy-embed" allowFullScreen></iframe></div><p><a href="https://giphy.com/gifs/cat-rolls-xoSaxIp8f9JPa"></a></p>
+]
+
+---
+
+```{r jan}
+```
+
+.pull-left[
+slide
+![](img/slide.gif)
+tile
+![](img/tile.gif)
+stretch
+![](img/stretch.gif)
+]
+.pull-right[
+<br>
+<img src="img/window.png">
+Type stability suffix: `*_dbl()`, `*_int()`, `*_lgl()`, `*_chr()`
+
+Parallel processing prefix: `future_*`.
+]
 
 ---
 class: inverse middle center
@@ -123,24 +210,27 @@ class: inverse middle center
 
 ---
 
-# New generic `model()`
-
+## New generic `model()`: mable
 
 ---
 
-## Map and roll
+## Sweep mable
 
-.left-column[
-<br>
-<br>
-![purrr-logo](https://raw.githubusercontent.com/rstudio/hex-stickers/master/PNG/purrr.png)
-]
+---
 
---
+## Yet still `forecast()`: fable
 
-.right-column[
-<div style="width:100%;height:0;padding-bottom:64%;position:relative;"><iframe src="https://giphy.com/embed/xoSaxIp8f9JPa" width="100%" height="100%" style="position:absolute" frameBorder="0" class="giphy-embed" allowFullScreen></iframe></div><p><a href="https://giphy.com/gifs/cat-rolls-xoSaxIp8f9JPa"></a></p>
-]
+---
+
+## Visualise fable
+
+---
+
+## Assess model performance
+
+---
+
+## Models are fundamentally scalable
 
 ---
 class: middle center

@@ -98,8 +98,8 @@ code {
   background: #f8f8f8;
   border-radius: 5px;
 }
-.remark-code, .remark-inline-code { font-family: 'Source Code Pro'; font-size: 78%; }
-.remark-code, .remark-code-line { font-family: 'Source Code Pro'; font-size: 88%; }
+.remark-code, .remark-inline-code { font-family: 'Source Code Pro'; font-size: 80%; }
+.remark-code, .remark-code-line { font-family: 'Source Code Pro'; font-size: 85%; color: #4d4d4d;}
 .remark-code-line-highlighted {
   background-color: #fee8c8;
 }
