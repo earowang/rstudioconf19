@@ -87,16 +87,14 @@ The underlying data structure: tsibble
 
 ```
 #&gt; # A tibble: 46,102,229 x 8
-#&gt;   customer_id reading_datetime    event_key
-#&gt;         &lt;int&gt; &lt;dttm&gt;                  &lt;int&gt;
-#&gt; 1     8143667 2013-04-03 07:30:00         0
-#&gt; 2     8143667 2013-04-03 08:00:00         0
-#&gt; 3     8143667 2013-04-03 08:30:00         0
-#&gt; 4     8143667 2013-04-03 09:00:00         0
-#&gt; # … with 4.61e+07 more rows, and 5 more
-#&gt; #   variables: general_supply_kwh &lt;dbl&gt;,
-#&gt; #   controlled_load_kwh &lt;int&gt;,
-#&gt; #   gross_generation_kwh &lt;int&gt;,
+#&gt;   customer_id reading_datetime    general_supply_… event_key
+#&gt;         &lt;int&gt; &lt;dttm&gt;                         &lt;dbl&gt;     &lt;int&gt;
+#&gt; 1     8143667 2013-04-03 07:30:00            0.117         0
+#&gt; 2     8143667 2013-04-03 08:00:00            0.051         0
+#&gt; 3     8143667 2013-04-03 08:30:00            0.085         0
+#&gt; 4     8143667 2013-04-03 09:00:00            0.165         0
+#&gt; # … with 4.61e+07 more rows, and 4 more variables:
+#&gt; #   controlled_load_kwh &lt;int&gt;, gross_generation_kwh &lt;int&gt;,
 #&gt; #   net_generation_kwh &lt;int&gt;, other_kwh &lt;int&gt;
 ```
 
@@ -109,7 +107,7 @@ class: inverse middle center
 &lt;img src="img/tsibble.png" height=280px&gt;
 ]
 
-## Yet another data standard
+## Modern time series standard
 
 ---
 
@@ -135,22 +133,20 @@ elec_ts &lt;- elec_tbl %&gt;%
 ```
 *#&gt; # A tsibble: 46,102,229 x 8 [30m] &lt;UTC&gt;
 *#&gt; # Key:       customer_id [2,924]
-#&gt;   customer_id reading_datetime    event_key
-#&gt;         &lt;int&gt; &lt;dttm&gt;                  &lt;int&gt;
-#&gt; 1     8143667 2013-04-03 07:30:00         0
-#&gt; 2     8143667 2013-04-03 08:00:00         0
-#&gt; 3     8143667 2013-04-03 08:30:00         0
-#&gt; 4     8143667 2013-04-03 09:00:00         0
-#&gt; # … with 4.61e+07 more rows, and 5 more
-#&gt; #   variables: general_supply_kwh &lt;dbl&gt;,
-#&gt; #   controlled_load_kwh &lt;int&gt;,
-#&gt; #   gross_generation_kwh &lt;int&gt;,
+#&gt;   customer_id reading_datetime    general_supply_… event_key
+#&gt;         &lt;int&gt; &lt;dttm&gt;                         &lt;dbl&gt;     &lt;int&gt;
+#&gt; 1     8143667 2013-04-03 07:30:00            0.117         0
+#&gt; 2     8143667 2013-04-03 08:00:00            0.051         0
+#&gt; 3     8143667 2013-04-03 08:30:00            0.085         0
+#&gt; 4     8143667 2013-04-03 09:00:00            0.165         0
+#&gt; # … with 4.61e+07 more rows, and 4 more variables:
+#&gt; #   controlled_load_kwh &lt;int&gt;, gross_generation_kwh &lt;int&gt;,
 #&gt; #   net_generation_kwh &lt;int&gt;, other_kwh &lt;int&gt;
 ```
 
 ---
 
-## Look at data early
+## Look at data early: time gaps
 
 &lt;img src="figure/line-na-1.svg" style="display: block; margin: auto;" /&gt;
 
@@ -160,7 +156,7 @@ elec_ts %&gt;% fill_gaps()
 
 &lt;img src="figure/fill-gaps-1.svg" style="display: block; margin: auto;" /&gt;
 
----
+???
 
 ## Implicit missing value handlers
 
@@ -172,7 +168,7 @@ elec_ts %&gt;% fill_gaps()
 
 ---
 
-## A new adjective `index_by()`
+## A new adjective `index_by()`: time-aware grouping
 
 
 ```r
@@ -272,7 +268,7 @@ class: inverse middle center
 
 ---
 
-## New generic `model()`: mable
+## mable: the `model()` generic
 
 
 ```r
@@ -282,15 +278,23 @@ elec_mbl &lt;- elec_jan %&gt;%
 ```
 
 ```
-#&gt; # A mable: 1 model
-#&gt;   naive   ets       
-#&gt;   &lt;model&gt; &lt;model&gt;   
-#&gt; 1 NAIVE   ETS(M,N,M)
+#&gt; # A mable: 1 x 2
+#&gt;   naive   ets         
+#&gt;   &lt;model&gt; &lt;model&gt;     
+#&gt; 1 &lt;NAIVE&gt; &lt;ETS(M,N,M)&gt;
 ```
+
+* succinct model representations
+* `summarise()` semantics: reduces rows
+
+???
+
+Models are reduced representations of the data down to simplistic structures 
+that are described by coefficients.
 
 ---
 
-## Sweep mable
+## Extract from mable
 
 
 ```r
@@ -306,7 +310,13 @@ glance(elec_mbl)
 ```
 
 ```
-#&gt; Error: Each column must either be a list of vectors or a list of data frames [key]
+#&gt; # A tibble: 2 x 13
+#&gt;   .model method formula   lag drift  sigma period logLik
+#&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;list&gt;  &lt;dbl&gt; &lt;lgl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+#&gt; 1 naive  NAIVE  &lt;sym&gt;       1 FALSE 0.0400     NA    NA 
+#&gt; 2 ets    ETS(M… &lt;sym&gt;      NA NA    0.0616     24   554.
+#&gt; # … with 5 more variables: AIC &lt;dbl&gt;, AICc &lt;dbl&gt;,
+#&gt; #   BIC &lt;dbl&gt;, MSE &lt;dbl&gt;, AMSE &lt;dbl&gt;
 ```
 
 ```r
@@ -316,19 +326,18 @@ augment(elec_mbl)
 ```
 #&gt; # A tsibble: 1,440 x 5 [1h] &lt;UTC&gt;
 #&gt; # Key:       .model [2]
-#&gt;   .model datetime            avg_kwh .fitted
-#&gt;   &lt;chr&gt;  &lt;dttm&gt;                &lt;dbl&gt;   &lt;dbl&gt;
-#&gt; 1 naive  2013-01-01 00:00:00   0.251  NA    
-#&gt; 2 naive  2013-01-01 01:00:00   0.221   0.251
-#&gt; 3 naive  2013-01-01 02:00:00   0.196   0.221
-#&gt; 4 naive  2013-01-01 03:00:00   0.182   0.196
-#&gt; # … with 1,436 more rows, and 1 more variable:
-#&gt; #   .resid &lt;dbl&gt;
+#&gt;   .model datetime            avg_kwh .fitted  .resid
+#&gt;   &lt;chr&gt;  &lt;dttm&gt;                &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+#&gt; 1 naive  2013-01-01 00:00:00   0.251  NA     NA     
+#&gt; 2 naive  2013-01-01 01:00:00   0.221   0.251 -0.0302
+#&gt; 3 naive  2013-01-01 02:00:00   0.196   0.221 -0.0246
+#&gt; 4 naive  2013-01-01 03:00:00   0.182   0.196 -0.0136
+#&gt; # … with 1,436 more rows
 ```
 
 ---
 
-## Yet still `forecast()`: fable
+## fable: `forecast()` the future
 
 
 ```r
@@ -338,25 +347,35 @@ elec_fbl &lt;- elec_mbl %&gt;%
 ```
 
 ```
-#&gt; # A fable: 48 x 4 [1h] &lt;UTC&gt;
+#&gt; # A fable: 48 x 5 [1h] &lt;UTC&gt;
 #&gt; # Key:     .model [2]
-#&gt;   .model datetime            avg_kwh .distribution
-#&gt;   &lt;chr&gt;  &lt;dttm&gt;                &lt;dbl&gt; &lt;dist&gt;       
-#&gt; 1 naive  2013-01-31 00:00:00   0.216 N(0.22, 0.00…
-#&gt; 2 naive  2013-01-31 01:00:00   0.216 N(0.22, 0.00…
-#&gt; 3 naive  2013-01-31 02:00:00   0.216 N(0.22, 0.00…
-#&gt; 4 naive  2013-01-31 03:00:00   0.216 N(0.22, 0.00…
+#&gt;   .model datetime            avg_kwh .distribution   .model1
+#&gt;   &lt;chr&gt;  &lt;dttm&gt;                &lt;dbl&gt; &lt;dist&gt;          &lt;chr&gt;  
+#&gt; 1 naive  2013-01-31 00:00:00   0.216 N(0.22, 0.0016) naive  
+#&gt; 2 naive  2013-01-31 01:00:00   0.216 N(0.22, 0.0032) naive  
+#&gt; 3 naive  2013-01-31 02:00:00   0.216 N(0.22, 0.0048) naive  
+#&gt; 4 naive  2013-01-31 03:00:00   0.216 N(0.22, 0.0064) naive  
 #&gt; # … with 44 more rows
 ```
 
 ---
 
+.left-column[
 ## Visualise fable
-
-.pull-left[
+### - Naive
+]
+.right-column[
 &lt;img src="figure/vis-naive-1.svg" style="display: block; margin: auto;" /&gt;
 ]
-.pull-right[
+
+---
+
+.left-column[
+## Visualise fable
+### - Naive
+### - ETS
+]
+.right-column[
 &lt;img src="figure/vis-ets-1.svg" style="display: block; margin: auto;" /&gt;
 ]
 
@@ -386,9 +405,24 @@ elec_ts %&gt;%
   forecast(h = 24)
 ```
 
+```r
+tsibble %&gt;% 
+  mable %&gt;% 
+  fable
+```
+
 ---
 
-## People behind the tidyverts
+## Much more in the tidyverts
+
+* Decomposition `STL()`
+* Simulation `simulate()`
+* Interpolation `interpolate()`
+* Refitting and streaming `refit()` &amp; `stream()`
+
+---
+
+## Joint work
 
 .center[
 .portrait[

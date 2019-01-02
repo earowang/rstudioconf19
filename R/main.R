@@ -4,7 +4,8 @@ library(lubridate)
 library(tidyverse)
 library(tsibble)
 
-elec_tbl <- read_rds("~/Research/paper-tsibble/data/smart-meter13.rds")
+elec_tbl <- read_rds("~/Research/paper-tsibble/data/smart-meter13.rds") %>% 
+  select(customer_id, reading_datetime, general_supply_kwh, everything())
 elec_tbl
 
 ## ---- coerce
@@ -161,7 +162,7 @@ elec_jan31 <- elec_avg %>%
 ## ---- calendar-train
 elec_jan %>% 
   ggplot(aes(x = hour, y = avg_kwh)) +
-  geom_line() +
+  geom_line(size = 1.2) +
   sugrrants::facet_calendar(~ date) +
   theme_remark()
 
@@ -188,13 +189,20 @@ elec_ftf <- elec_fbl %>%
   mutate(date = as_date(datetime), hour = hour(datetime))
 elec_jan %>% 
   ggplot(aes(x = hour, y = avg_kwh)) +
-  geom_line() +
+  geom_line(size = 1.2) +
   geom_forecast(
     aes(ymin = lower, ymax = upper, level = level),
     elec_ftf, stat = "identity"
   ) +
   sugrrants::facet_calendar(~ date) +
   theme_remark()
+
+# elec_jan %>% 
+#   ggplot(aes(x = hour, y = avg_kwh)) +
+#   geom_line(size = 1.2) +
+#   geom_forecast(aes(dist = .distribution), data = elec_fbl) +
+#   sugrrants::facet_calendar(~ date) +
+#   theme_remark()
 
 ## ---- vis-ets
 elec_ftf <- elec_fbl %>% 
@@ -203,7 +211,7 @@ elec_ftf <- elec_fbl %>%
   mutate(date = as_date(datetime), hour = hour(datetime))
 elec_jan %>% 
   ggplot(aes(x = hour, y = avg_kwh)) +
-  geom_line() +
+  geom_line(size = 1.2) +
   geom_forecast(
     aes(ymin = lower, ymax = upper, level = level),
     elec_ftf, stat = "identity"

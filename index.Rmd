@@ -103,7 +103,7 @@ class: inverse middle center
 <img src="img/tsibble.png" height=280px>
 ]
 
-## Yet another data standard
+## Modern time series standard
 
 ---
 
@@ -124,7 +124,7 @@ class: inverse middle center
 
 ---
 
-## Look at data early
+## Look at data early: time gaps
 
 ```{r line-na, fig.height = 2.3}
 ```
@@ -136,7 +136,7 @@ elec_ts %>% fill_gaps()
 ```{r fill-gaps, fig.height = 2.3}
 ```
 
----
+???
 
 ## Implicit missing value handlers
 
@@ -148,7 +148,7 @@ elec_ts %>% fill_gaps()
 
 ---
 
-## A new adjective `index_by()`
+## A new adjective `index_by()`: time-aware grouping
 
 ```{r index-by, echo = TRUE}
 ```
@@ -230,35 +230,53 @@ class: inverse middle center
 
 ---
 
-## New generic `model()`: mable
+## mable: the `model()` generic
 
 ```{r model, echo = TRUE}
 ```
 
+* succinct model representations
+* `summarise()` semantics: reduces rows
+
+???
+
+Models are reduced representations of the data down to simplistic structures 
+that are described by coefficients.
+
 ---
 
-## Sweep mable
+## Extract from mable
 
 ```{r sweep, error = TRUE, echo = TRUE}
 ```
 
 ---
 
-## Yet still `forecast()`: fable
+## fable: `forecast()` the future
 
 ```{r forecast, echo = TRUE}
 ```
 
 ---
 
+.left-column[
 ## Visualise fable
-
-.pull-left[
-```{r vis-naive, fig.height = 12}
+### - Naive
+]
+.right-column[
+```{r vis-naive}
 ```
 ]
-.pull-right[
-```{r vis-ets, fig.height = 12}
+
+---
+
+.left-column[
+## Visualise fable
+### - Naive
+### - ETS
+]
+.right-column[
+```{r vis-ets}
 ```
 ]
 
@@ -276,9 +294,24 @@ class: inverse middle center
 ```{r final, eval = FALSE, echo = TRUE}
 ```
 
+```r
+tsibble %>% 
+  mable %>% 
+  fable
+```
+
 ---
 
-## People behind the tidyverts
+## Much more in the tidyverts
+
+* Decomposition `STL()`
+* Simulation `simulate()`
+* Interpolation `interpolate()`
+* Refitting and streaming `refit()` & `stream()`
+
+---
+
+## Joint work
 
 .center[
 .portrait[
