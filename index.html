@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ## Today we'll learn
 
 .center[
-### 1 unified tidy time series workflow ‼️
+### 1 tidy unified time series workflow ‼️
 ]
 &lt;br&gt;
 
@@ -58,11 +58,11 @@ data examples.
 ![](img/r4ds.svg)
 ]
 
-The underlying data structure: tibble
+The underlying data structure: [tibble]()
 
 ---
 
-## Current time series workflow ☹️
+## Current time series workflow
 
 .center[
 ![](img/r4ts.svg)
@@ -78,7 +78,7 @@ The mésalliance between temporal data and time series models
 ![](img/r4tidyverts.svg)
 ]
 
-The underlying data structure: tsibble
+The underlying data structure: [tsibble]()
 
 ---
 
@@ -87,16 +87,23 @@ The underlying data structure: tsibble
 
 ```
 #&gt; # A tibble: 46,102,229 x 8
-#&gt;   customer_id reading_datetime    general_supply_… event_key
-#&gt;         &lt;int&gt; &lt;dttm&gt;                         &lt;dbl&gt;     &lt;int&gt;
-#&gt; 1     8143667 2013-04-03 07:30:00            0.117         0
-#&gt; 2     8143667 2013-04-03 08:00:00            0.051         0
-#&gt; 3     8143667 2013-04-03 08:30:00            0.085         0
-#&gt; 4     8143667 2013-04-03 09:00:00            0.165         0
-#&gt; # … with 4.61e+07 more rows, and 4 more variables:
-#&gt; #   controlled_load_kwh &lt;int&gt;, gross_generation_kwh &lt;int&gt;,
+#&gt;   customer_id reading_datetime    general_supply_…
+#&gt;         &lt;int&gt; &lt;dttm&gt;                         &lt;dbl&gt;
+#&gt; 1     8143667 2013-04-03 07:30:00            0.117
+#&gt; 2     8143667 2013-04-03 08:00:00            0.051
+#&gt; 3     8143667 2013-04-03 08:30:00            0.085
+#&gt; 4     8143667 2013-04-03 09:00:00            0.165
+#&gt; # … with 4.61e+07 more rows, and 5 more variables:
+#&gt; #   event_key &lt;int&gt;, controlled_load_kwh &lt;int&gt;,
+#&gt; #   gross_generation_kwh &lt;int&gt;,
 #&gt; #   net_generation_kwh &lt;int&gt;, other_kwh &lt;int&gt;
 ```
+
+.center[
+.card[.large[many subjects]]
+.card[.large[many measurements]]
+.card[.large[fine time resolutions]]
+]
 
 .footnote[[Data source: Department of the Environment and Energy, Australia](https://data.gov. au/dataset/4e21dea3-9b87-4610-94c7-15a8a77907ef)]
 
@@ -107,7 +114,7 @@ class: inverse middle center
 &lt;img src="img/tsibble.png" height=280px&gt;
 ]
 
-## Modern time series standard
+## A modern reimagining of the time series
 
 ---
 
@@ -122,8 +129,8 @@ elec_ts &lt;- elec_tbl %&gt;%
   )
 ```
 
-* **key**:
-* **index**:
+1. &lt;i class="fas fa-users"&gt;&lt;/i&gt; **key**: identifying variables that determine subjects to be tracked over time
+2. &lt;i class='far fa-clock'&gt;&lt;/i&gt; **index**: a variable that represents time
 
 ---
 
@@ -133,14 +140,15 @@ elec_ts &lt;- elec_tbl %&gt;%
 ```
 *#&gt; # A tsibble: 46,102,229 x 8 [30m] &lt;UTC&gt;
 *#&gt; # Key:       customer_id [2,924]
-#&gt;   customer_id reading_datetime    general_supply_… event_key
-#&gt;         &lt;int&gt; &lt;dttm&gt;                         &lt;dbl&gt;     &lt;int&gt;
-#&gt; 1     8143667 2013-04-03 07:30:00            0.117         0
-#&gt; 2     8143667 2013-04-03 08:00:00            0.051         0
-#&gt; 3     8143667 2013-04-03 08:30:00            0.085         0
-#&gt; 4     8143667 2013-04-03 09:00:00            0.165         0
-#&gt; # … with 4.61e+07 more rows, and 4 more variables:
-#&gt; #   controlled_load_kwh &lt;int&gt;, gross_generation_kwh &lt;int&gt;,
+#&gt;   customer_id reading_datetime    general_supply_…
+#&gt;         &lt;int&gt; &lt;dttm&gt;                         &lt;dbl&gt;
+#&gt; 1     8143667 2013-04-03 07:30:00            0.117
+#&gt; 2     8143667 2013-04-03 08:00:00            0.051
+#&gt; 3     8143667 2013-04-03 08:30:00            0.085
+#&gt; 4     8143667 2013-04-03 09:00:00            0.165
+#&gt; # … with 4.61e+07 more rows, and 5 more variables:
+#&gt; #   event_key &lt;int&gt;, controlled_load_kwh &lt;int&gt;,
+#&gt; #   gross_generation_kwh &lt;int&gt;,
 #&gt; #   net_generation_kwh &lt;int&gt;, other_kwh &lt;int&gt;
 ```
 
@@ -156,15 +164,41 @@ elec_ts %&gt;% fill_gaps()
 
 &lt;img src="figure/fill-gaps-1.svg" style="display: block; margin: auto;" /&gt;
 
-???
+---
 
 ## Implicit missing value handlers
 
+.pull-left[
 &lt;br&gt;
-1. Check with `has_gaps()`
-2. Report with `scan_gaps()`
-3. Summarise with `count_gaps()`
-4. Fill in time gaps with `fill_gaps()`
+1. Check: `has_gaps()`
+2. Reveal: `scan_gaps()`
+3. Summarise: `count_gaps()`
+4. Fill in time gaps: `fill_gaps()`
+]
+.pull-right[
+.large[
+```r
+has_gaps(elec_ts)
+```
+
+```
+#&gt; # A tibble: 2,924 x 2
+#&gt;    customer_id .gaps
+#&gt;          &lt;int&gt; &lt;lgl&gt;
+#&gt;  1     8143667 FALSE
+#&gt;  2     8143741 FALSE
+#&gt;  3     8143763 FALSE
+#&gt;  4     8143811 FALSE
+#&gt;  5     8143817 FALSE
+#&gt;  6     8143819 FALSE
+#&gt;  7     8143839 FALSE
+#&gt;  8     8143877 FALSE
+#&gt;  9     8144653 TRUE 
+#&gt; 10     8144679 TRUE 
+#&gt; # … with 2,914 more rows
+```
+]
+]
 
 ---
 
@@ -191,7 +225,7 @@ elec_avg &lt;- elec_ts %&gt;%
 
 ---
 
-## Map and roll
+## Functional programming: map and roll
 
 .left-column[
 &lt;br&gt;
@@ -260,6 +294,9 @@ class: inverse middle center
 
 ---
 
+.left-column[
+## The first 30 days
+]
 .right-column[
 
 
@@ -268,21 +305,29 @@ class: inverse middle center
 
 ---
 
-## mable: the `model()` generic
+## .blue[mable]: the `model()` generic
 
 
 ```r
 elec_mbl &lt;- elec_jan %&gt;% 
-  model(naive = NAIVE(avg_kwh), ets = ETS(avg_kwh)) %&gt;%
+  model(naive = SNAIVE(avg_kwh), ets = ETS(avg_kwh)) %&gt;%
   print()
 ```
 
+.pull-left[
 ```
 #&gt; # A mable: 1 x 2
-#&gt;   naive   ets         
-#&gt;   &lt;model&gt; &lt;model&gt;     
-#&gt; 1 &lt;NAIVE&gt; &lt;ETS(M,N,M)&gt;
+#&gt;   naive    ets         
+#&gt;   &lt;model&gt;  &lt;model&gt;     
+#&gt; 1 &lt;SNAIVE&gt; &lt;ETS(M,N,M)&gt;
 ```
+]
+.pull-right[
+.alert[
+1. **formula interface: &lt;br&gt; `response ~ model spec`**
+2. **automatic model selection**
+]
+]
 
 * succinct model representations
 * `summarise()` semantics: reduces rows
@@ -294,50 +339,26 @@ that are described by coefficients.
 
 ---
 
-## Extract from mable
+## Inspect mable
 
-
-```r
-tidy(elec_mbl)
-```
-
-```
-#&gt; Error: All nested columns must have the same number of elements.
-```
-
-```r
-glance(elec_mbl)
-```
+1. `tidy()` model parameters
+2. `glance()` a one-row per model summary 
+3. `augment()` with model fits (`.fitted` &amp; `.resid`)
 
 ```
-#&gt; # A tibble: 2 x 13
-#&gt;   .model method formula   lag drift  sigma period logLik
-#&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;list&gt;  &lt;dbl&gt; &lt;lgl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
-#&gt; 1 naive  NAIVE  &lt;sym&gt;       1 FALSE 0.0400     NA    NA 
-#&gt; 2 ets    ETS(M… &lt;sym&gt;      NA NA    0.0616     24   554.
-#&gt; # … with 5 more variables: AIC &lt;dbl&gt;, AICc &lt;dbl&gt;,
-#&gt; #   BIC &lt;dbl&gt;, MSE &lt;dbl&gt;, AMSE &lt;dbl&gt;
-```
-
-```r
-augment(elec_mbl)
-```
-
-```
-#&gt; # A tsibble: 1,440 x 5 [1h] &lt;UTC&gt;
-#&gt; # Key:       .model [2]
-#&gt;   .model datetime            avg_kwh .fitted  .resid
-#&gt;   &lt;chr&gt;  &lt;dttm&gt;                &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
-#&gt; 1 naive  2013-01-01 00:00:00   0.251  NA     NA     
-#&gt; 2 naive  2013-01-01 01:00:00   0.221   0.251 -0.0302
-#&gt; 3 naive  2013-01-01 02:00:00   0.196   0.221 -0.0246
-#&gt; 4 naive  2013-01-01 03:00:00   0.182   0.196 -0.0136
-#&gt; # … with 1,436 more rows
+#&gt; # A tibble: 27 x 4
+#&gt;   .model term  estimate std.error
+#&gt;   &lt;chr&gt;  &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+#&gt; 1 naive  b        0             0
+#&gt; 2 ets    alpha    0.882        NA
+#&gt; 3 ets    gamma    0.118        NA
+#&gt; 4 ets    l        0.385        NA
+#&gt; # … with 23 more rows
 ```
 
 ---
 
-## fable: `forecast()` the future
+## .blue[fable]: `forecast()` the future
 
 
 ```r
@@ -347,21 +368,21 @@ elec_fbl &lt;- elec_mbl %&gt;%
 ```
 
 ```
-#&gt; # A fable: 48 x 5 [1h] &lt;UTC&gt;
+#&gt; # A fable: 48 x 4 [1h] &lt;UTC&gt;
 #&gt; # Key:     .model [2]
-#&gt;   .model datetime            avg_kwh .distribution   .model1
-#&gt;   &lt;chr&gt;  &lt;dttm&gt;                &lt;dbl&gt; &lt;dist&gt;          &lt;chr&gt;  
-#&gt; 1 naive  2013-01-31 00:00:00   0.216 N(0.22, 0.0016) naive  
-#&gt; 2 naive  2013-01-31 01:00:00   0.216 N(0.22, 0.0032) naive  
-#&gt; 3 naive  2013-01-31 02:00:00   0.216 N(0.22, 0.0048) naive  
-#&gt; 4 naive  2013-01-31 03:00:00   0.216 N(0.22, 0.0064) naive  
+#&gt;   .model datetime            avg_kwh .distribution 
+#&gt;   &lt;chr&gt;  &lt;dttm&gt;                &lt;dbl&gt; &lt;dist&gt;        
+#&gt; 1 naive  2013-01-31 00:00:00   0.179 N(0.18, 0.031)
+#&gt; 2 naive  2013-01-31 01:00:00   0.164 N(0.16, 0.031)
+#&gt; 3 naive  2013-01-31 02:00:00   0.158 N(0.16, 0.031)
+#&gt; 4 naive  2013-01-31 03:00:00   0.151 N(0.15, 0.031)
 #&gt; # … with 44 more rows
 ```
 
 ---
 
 .left-column[
-## Visualise fable
+## Visualise fable .large[`geom_forecast()`]
 ### - Naive
 ]
 .right-column[
@@ -371,7 +392,7 @@ elec_fbl &lt;- elec_mbl %&gt;%
 ---
 
 .left-column[
-## Visualise fable
+## Visualise fable .large[`geom_forecast()`]
 ### - Naive
 ### - ETS
 ]
@@ -389,12 +410,16 @@ accuracy(elec_fbl, elec_jan31)
 ```
 
 ```
-#&gt; Error: Unknown column `.actual`
+#&gt; # A tibble: 2 x 8
+#&gt;   .model Type      ME   RMSE    MAE   MPE  MAPE  ACF1
+#&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#&gt; 1 ets    Test  0.0681 0.0866 0.0681  18.5  18.5 0.906
+#&gt; 2 naive  Test  0.0700 0.0972 0.0700  17.3  17.3 0.942
 ```
 
 ---
 
-## Models are fundamentally scalable
+## Many model fits at once
 
 
 ```r
@@ -411,6 +436,10 @@ tsibble %&gt;%
   fable
 ```
 
+???
+
+Models are fundamentally scalable
+
 ---
 
 ## Much more in the tidyverts
@@ -424,14 +453,15 @@ tsibble %&gt;%
 
 ## Joint work
 
+.div-middle[
 .center[
 .portrait[
-![](http://dicook.org/img/dicook-2014.jpg)
+![](img/di.jpg)
 Di Cook &lt;br&gt;
 &lt;i class='fab fa-twitter' style='color:#6CADDE'&gt;&lt;/i&gt; [@visnut](http://twitter.com/visnut)
 ]
 .portrait[
-![](https://robjhyndman.com/pics/RobHyndman-highres.jpg)
+![](img/rob.jpg)
 Rob J Hyndman &lt;br&gt;
 &lt;i class='fab fa-twitter' style='color:#6CADDE'&gt;&lt;/i&gt; [@robjhyndman](http://twitter.com/robjhyndman)
 ]
@@ -439,6 +469,7 @@ Rob J Hyndman &lt;br&gt;
 ![](https://d33wubrfki0l68.cloudfront.net/362995d299699959fe385c344e24331f9c0b256c/ecdb4/img/circle.jpg)
 Mitchell O'Hara‑Wild &lt;br&gt;
 &lt;i class='fab fa-twitter' style='color:#6CADDE'&gt;&lt;/i&gt; [@mitchoharawild](http://twitter.com/mitchoharawild)
+]
 ]
 ]
 

@@ -32,15 +32,14 @@ customer_659 %>%
   ggplot(aes(x = reading_datetime, y = general_supply_kwh)) +
   geom_line(size = 0.4)
 
+## ---- has-gaps
+print(has_gaps(elec_ts), n = 10)
+
 ## ---- index-by
 elec_avg <- elec_ts %>% 
   index_by(datetime = floor_date(reading_datetime, "hour")) %>% #<<
   summarise(avg_kwh = mean(general_supply_kwh)) %>% 
   print()
-
-## ---- jan
-elec_jan <- elec_avg %>% 
-  filter_index(~ "2013-01-14")
 
 ## ---- slide-animate
 library(gganimate)
@@ -168,12 +167,16 @@ elec_jan %>%
 
 ## ----- model
 elec_mbl <- elec_jan %>% 
-  model(naive = NAIVE(avg_kwh), ets = ETS(avg_kwh)) %>%
+  model(naive = SNAIVE(avg_kwh), ets = ETS(avg_kwh)) %>%
   print()
 
-## ---- sweep
+## ---- tidy
 tidy(elec_mbl)
+
+## ---- glance
 glance(elec_mbl)
+
+## ---- augment
 augment(elec_mbl)
 
 ## ---- forecast
