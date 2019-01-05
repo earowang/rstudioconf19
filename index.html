@@ -241,8 +241,6 @@ elec_avg &lt;- elec_ts %&gt;%
 
 ---
 
-
-
 .pull-left[
 slide
 ![](img/slide.gif)
@@ -261,18 +259,21 @@ Parallel processing prefix: `future_*`.
 
 ---
 
-## A simple example
-
-
-```r
-elec_ma &lt;- elec_avg %&gt;% 
-  mutate(
-    ma_kwh24 = slide_dbl(avg_kwh, ~ mean(.x), .size = 24, .align = "cl"),
-    ma_kwh720 = slide_dbl(avg_kwh, ~ mean(.x), .size = 720, .align = "cl"),
-  ) 
-```
-
-&lt;img src="figure/moving-average-plot-1.svg" style="display: block; margin: auto;" /&gt;
+.left-column[
+## Rolling averages
+]
+.right-column[
+.center[
+`slide_dbl(x, ~ mean(.), .size = 24)`
+&lt;img src="img/slide-mean.gif" height=130px&gt;
+&lt;br&gt;
+`tile_dbl(x, ~ mean(.), .size = 24)`
+&lt;img src="img/tile-mean.gif" height=130px&gt;
+&lt;br&gt;
+`stretch_dbl(x, ~ mean(.), .init = 24)`
+&lt;img src="img/stretch-mean.gif" height=130px&gt;
+]
+]
 
 ---
 class: inverse middle center
@@ -281,7 +282,7 @@ class: inverse middle center
 &lt;img src="img/fable.png" height=280px&gt;
 ]
 
-## Tidy forecasting
+## Tidy happy forecasting
 
 ---
 
@@ -363,7 +364,7 @@ that are described by coefficients.
 
 ```r
 elec_fbl &lt;- elec_mbl %&gt;% 
-  forecast(h = 24) %&gt;% 
+  forecast(h = "1 day") %&gt;% 
   print()
 ```
 
@@ -422,19 +423,15 @@ accuracy(elec_fbl, elec_jan31)
 ## Many model fits at once
 
 
-```r
-elec_ts %&gt;% 
-  group_by(customer_id) %&gt;% 
-  fill_gaps(avg_kwh = mean(avg_kwh)) %&gt;% 
-  model(arima = ARIMA(avg_kwh), ets = ETS(avg_kwh)) %&gt;%
-  forecast(h = 24)
-```
+
 
 ```r
-tsibble %&gt;% 
-  mable %&gt;% 
-  fable
+elec_fct &lt;- elec_sub %&gt;% 
+  model(ets = ETS(log(general_supply_kwh))) %&gt;% 
+  forecast(h = "1 day")
 ```
+
+&lt;img src="figure/batch-plot-1.svg" style="display: block; margin: auto;" /&gt;
 
 ???
 

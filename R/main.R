@@ -24,13 +24,15 @@ customer_659 <- elec_ts %>%
 
 customer_659 %>% 
   ggplot(aes(x = reading_datetime, y = general_supply_kwh)) +
-  geom_line(size = 0.4)
+  geom_line(size = 0.4) +
+  theme_remark()
 
 ## ---- fill-gaps
 customer_659 %>% 
   fill_gaps() %>% 
   ggplot(aes(x = reading_datetime, y = general_supply_kwh)) +
-  geom_line(size = 0.4)
+  geom_line(size = 0.4) +
+  theme_remark()
 
 ## ---- has-gaps
 print(has_gaps(elec_ts), n = 10)
@@ -42,13 +44,14 @@ elec_avg <- elec_ts %>%
   print()
 
 ## ---- slide-animate
+elec_jan <- elec_avg %>% 
+  filter_index(~ "2013-01-15")
 library(gganimate)
 slide_window <- slider(elec_jan$datetime, .size = 24) %>%
   map_dfr(function(x) tibble(xmin = min(x), xmax = max(x))) %>%
   mutate(ymin = -Inf, ymax = Inf, group = row_number())
 p_slide <- ggplot() +
-  geom_line(aes(datetime, avg_kwh), data = elec_jan) +
-  geom_point(aes(datetime, avg_kwh), data = elec_jan, size = 0.5) +
+  geom_line(aes(datetime, avg_kwh), size = 1.2, data = elec_jan) +
   geom_rect(aes(
     xmin = xmin, xmax = xmax,
     ymin = ymin, ymax = ymax,
@@ -61,13 +64,24 @@ p_slide <- ggplot() +
   transition_manual(group)
 anim_save("img/slide.gif", p_slide, width = 800, height = 250)
 
+## ---- sliding-average
+elec_slide_mean <- elec_jan %>% 
+  mutate(ma_kwh24 = slide_dbl(avg_kwh, ~ mean(.x), .size = 24, .align = "cl"))  %>% 
+  ggplot(aes(x = datetime,  y = ma_kwh24)) +
+  geom_point(size = 2) +
+  geom_line(size = 1.2) +
+  xlab("Time") +
+  ylab("Average kwH") +
+  theme_bw() +
+  transition_reveal(datetime)
+anim_save("img/slide-mean.gif", elec_slide_mean, width = 800, height = 250)
+
 ## ---- tile-animate
 tile_window <- tiler(elec_jan$datetime, .size = 24) %>%
   map_dfr(function(x) tibble(xmin = min(x), xmax = max(x))) %>%
   mutate(ymin = -Inf, ymax = Inf, group = row_number())
 p_tile <- ggplot() +
-  geom_line(aes(datetime, avg_kwh), data = elec_jan) +
-  geom_point(aes(datetime, avg_kwh), data = elec_jan, size = 0.5) +
+  geom_line(aes(datetime, avg_kwh), data = elec_jan, size = 1.2) +
   geom_rect(aes(
     xmin = xmin, xmax = xmax,
     ymin = ymin, ymax = ymax,
@@ -80,13 +94,27 @@ p_tile <- ggplot() +
   transition_manual(group)
 anim_save("img/tile.gif", p_tile, width = 800, height = 250)
 
+## ---- tile-average
+elec_tile_mean <- 
+  tibble(
+    datetime = make_datetime(2013, 1, 1:15, hour = 12),
+    ma_kwh24 = tile_dbl(elec_jan$avg_kwh, ~ mean(.x), .size = 24)
+  ) %>% 
+  ggplot(aes(x = datetime,  y = ma_kwh24)) +
+  geom_point(size = 2) +
+  geom_line(size = 1.2) +
+  xlab("Time") +
+  ylab("Average kwH") +
+  theme_bw() +
+  transition_reveal(datetime)
+anim_save("img/tile-mean.gif", elec_tile_mean, width = 800, height = 250)
+
 ## ---- stretch-animate
 stretch_window <- stretcher(elec_jan$datetime, .init = 24) %>%
   map_dfr(function(x) tibble(xmin = min(x), xmax = max(x))) %>%
   mutate(ymin = -Inf, ymax = Inf, group = row_number())
 p_stretch <- ggplot() +
-  geom_line(aes(datetime, avg_kwh), data = elec_jan) +
-  geom_point(aes(datetime, avg_kwh), data = elec_jan, size = 0.5) +
+  geom_line(aes(datetime, avg_kwh), data = elec_jan, size = 1.2) +
   geom_rect(aes(
     xmin = xmin, xmax = xmax,
     ymin = ymin, ymax = ymax,
@@ -98,6 +126,18 @@ p_stretch <- ggplot() +
   theme_bw() +
   transition_manual(group)
 anim_save("img/stretch.gif", p_stretch, width = 800, height = 250)
+
+## ---- stretch-average
+elec_stretch_mean <- elec_jan %>% 
+  mutate(ma_kwh24 = c(rep(NA_real_, 23), stretch_dbl(avg_kwh, ~ mean(.x), .init = 24)))  %>% 
+  ggplot(aes(x = datetime,  y = ma_kwh24)) +
+  geom_point(size = 2) +
+  geom_line(size = 1.2) +
+  xlab("Time") +
+  ylab("Average kwH") +
+  theme_bw() +
+  transition_reveal(datetime)
+anim_save("img/stretch-mean.gif", elec_stretch_mean, width = 800, height = 250)
 
 ## ---- window-table
 library(gt)
@@ -181,7 +221,7 @@ augment(elec_mbl)
 
 ## ---- forecast
 elec_fbl <- elec_mbl %>% 
-  forecast(h = 24) %>% 
+  forecast(h = "1 day") %>% 
   print()
 
 ## ---- vis-naive
@@ -195,7 +235,7 @@ elec_jan %>%
   geom_line(size = 1.2) +
   geom_forecast(
     aes(ymin = lower, ymax = upper, level = level),
-    elec_ftf, stat = "identity"
+    elec_ftf, stat = "identity", size = 1.2
   ) +
   sugrrants::facet_calendar(~ date) +
   theme_remark()
@@ -217,7 +257,7 @@ elec_jan %>%
   geom_line(size = 1.2) +
   geom_forecast(
     aes(ymin = lower, ymax = upper, level = level),
-    elec_ftf, stat = "identity"
+    elec_ftf, stat = "identity", size = 1.2
   ) +
   sugrrants::facet_calendar(~ date) +
   theme_remark()
@@ -225,9 +265,79 @@ elec_jan %>%
 ## ----- accuracy
 accuracy(elec_fbl, elec_jan31)
 
-## ---- final
-elec_ts %>% 
-  group_by(customer_id) %>% 
-  fill_gaps(avg_kwh = mean(avg_kwh)) %>% 
-  model(arima = ARIMA(avg_kwh), ets = ETS(avg_kwh)) %>%
-  forecast(h = 24)
+## ----- subset
+set.seed(20190105)
+sel_id <- has_gaps(elec_ts) %>% 
+  filter(!.gaps) %>% 
+  pull(customer_id) %>% 
+  sample(size = 5)
+elec_sub <- elec_ts %>% 
+  filter(customer_id %in% sel_id) %>% 
+  group_by_key() %>% 
+  index_by(datetime = floor_date(reading_datetime, "hour")) %>%
+  summarise(general_supply_kwh = sum(general_supply_kwh)) %>% 
+  filter_index(~ "2013-01-14")
+
+## ---- batch
+elec_fct <- elec_sub %>% 
+  model(ets = ETS(log(general_supply_kwh))) %>% 
+  forecast(h = "1 day")
+
+## ---- batch-plot
+elec_sub %>% 
+  ggplot(aes(x = datetime, y = general_supply_kwh)) +
+  geom_line() +
+  geom_forecast(
+    aes(ymin = lower, ymax = upper, level = level),
+    elec_fct, stat = "identity"
+  ) +
+  facet_wrap(~ customer_id, scales = "free_y", ncol = 2, labeller = "label_both") +
+  xlab("Reading time") +
+  ylab("General supply kwH") +
+  theme_remark()
+
+# elec_sub %>% 
+#   ggplot(aes(x = reading_datetime, y = general_supply_kwh)) +
+#   geom_line() +
+#   facet_wrap(~ customer_id, ncol = 1)
+
+## ---- expand-forecast
+library(future)
+plan(multiprocess)
+subset_tsibble <- function(...) {
+  as_tsibble(list(...), index = datetime, key = id(customer_id),
+    validate = FALSE)
+}
+expand_forecast <- function(...) {
+  as_tsibble(list(...), index = datetime, key = id(customer_id),
+    validate = FALSE) %>% 
+    model(ets = ETS(general_supply_kwh)) %>% 
+    forecast(h = "1 day")
+}
+elec_lst <- elec_sub %>% 
+  split(.$customer_id)
+elec_dat <- elec_lst %>% 
+  map(~ pstretch(., subset_tsibble, .size = 24, .init = 24 * 7))
+elec_fct <- elec_lst %>% 
+  map(~ future_pstretch(., expand_forecast, .size = 24, .init = 24 * 7))
+
+## ---- anim-forecast
+for (i in 1:4) {
+  p <- ggplot() 
+  for (j in 1:25) {
+    dat <- elec_dat[[i]][[j]]
+    fct <- elec_fct[[i]][[j]]
+    p <- p + geom_line(aes(x = datetime, y = general_supply_kwh), data = dat) +
+    geom_forecast(aes(x = datetime, y = general_supply_kwh, 
+      ymin = lower, ymax = upper, level = level),
+      fct, stat = "identity"
+    )
+  }
+  p_rolling <- p +
+    transition_layers(
+      layer_length = 1, transition_length = 2, 
+      keep_layers = c(Inf, 0), from_blank = FALSE,
+    )
+  file <- paste0("img/rolling", i, ".gif")
+  anim_save(file, p_rolling, width = 800, height = 250)
+}

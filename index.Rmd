@@ -188,9 +188,6 @@ has_gaps(elec_ts)
 
 ---
 
-```{r jan}
-```
-
 .pull-left[
 slide
 ![](img/slide.gif)
@@ -209,13 +206,21 @@ Parallel processing prefix: `future_*`.
 
 ---
 
-## A simple example
-
-```{r moving-average, echo = TRUE}
-```
-
-```{r moving-average-plot, fig.height = 3}
-```
+.left-column[
+## Rolling averages
+]
+.right-column[
+.center[
+`slide_dbl(x, ~ mean(.), .size = 24)`
+<img src="img/slide-mean.gif" height=130px>
+<br>
+`tile_dbl(x, ~ mean(.), .size = 24)`
+<img src="img/tile-mean.gif" height=130px>
+<br>
+`stretch_dbl(x, ~ mean(.), .init = 24)`
+<img src="img/stretch-mean.gif" height=130px>
+]
+]
 
 ---
 class: inverse middle center
@@ -224,7 +229,7 @@ class: inverse middle center
 <img src="img/fable.png" height=280px>
 ]
 
-## Tidy forecasting
+## Tidy happy forecasting
 
 ---
 
@@ -329,13 +334,13 @@ that are described by coefficients.
 
 ## Many model fits at once
 
-```{r final, eval = FALSE, echo = TRUE}
+```{r subset}
 ```
 
-```r
-tsibble %>% 
-  mable %>% 
-  fable
+```{r batch, echo = TRUE}
+```
+
+```{r batch-plot, fig.height = 4.5}
 ```
 
 ???
