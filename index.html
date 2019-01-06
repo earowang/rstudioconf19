@@ -169,11 +169,12 @@ elec_ts %&gt;% fill_gaps()
 ## Implicit missing value handlers
 
 .pull-left[
-&lt;br&gt;
+.div-middle[
 1. Check: `has_gaps()`
 2. Reveal: `scan_gaps()`
 3. Summarise: `count_gaps()`
 4. Fill in time gaps: `fill_gaps()`
+]
 ]
 .pull-right[
 .large[
@@ -259,20 +260,49 @@ Parallel processing prefix: `future_*`.
 
 ---
 
-.left-column[
 ## Rolling averages
+.pull-left[
+
+```r
+slide_dbl(x, ~ mean(.), 
+  .size = 24)
+```
+.div-middle[
+
+```r
+tile_dbl(x, ~ mean(.), 
+  .size = 24)
+```
 ]
-.right-column[
+.div-middle[
+
+```r
+stretch_dbl(x, ~ mean(.), 
+  .init = 24)
+```
+]
+]
+.pull-right[
+&lt;img src="img/slide-mean.gif", height="160px"&gt;
+&lt;img src="img/tile-mean.gif", height="160px"&gt;
+&lt;img src="img/stretch-mean.gif", height="160px"&gt;
+]
+
+---
+
+## Rolling forecast
+
+
+```r
+plan(multiprocess)
+expand_forecast &lt;- function(...) {
+  # tidy forecasting ...
+}
+elec_avg %&gt;% 
+  future_pstretch(expand_forecast, .size = 24, .init = 168)
+```
 .center[
-`slide_dbl(x, ~ mean(.), .size = 24)`
-&lt;img src="img/slide-mean.gif" height=130px&gt;
-&lt;br&gt;
-`tile_dbl(x, ~ mean(.), .size = 24)`
-&lt;img src="img/tile-mean.gif" height=130px&gt;
-&lt;br&gt;
-`stretch_dbl(x, ~ mean(.), .init = 24)`
-&lt;img src="img/stretch-mean.gif" height=130px&gt;
-]
+&lt;img src="img/rolling.gif"&gt;
 ]
 
 ---
@@ -282,7 +312,7 @@ class: inverse middle center
 &lt;img src="img/fable.png" height=280px&gt;
 ]
 
-## Tidy happy forecasting
+## Tidy forecasting
 
 ---
 
@@ -325,7 +355,7 @@ elec_mbl &lt;- elec_jan %&gt;%
 ]
 .pull-right[
 .alert[
-1. **formula interface: &lt;br&gt; `response ~ model spec`**
+1. **model specification: &lt;br&gt; `response ~ model specials`**
 2. **automatic model selection**
 ]
 ]
@@ -361,12 +391,20 @@ that are described by coefficients.
 
 ## .blue[fable]: `forecast()` the future
 
+.pull-left[
 
 ```r
 elec_fbl &lt;- elec_mbl %&gt;% 
-  forecast(h = "1 day") %&gt;% 
-  print()
+  forecast(h = "1 day")
 ```
+]
+.pull-right[
+.alert[
+1. **natural language support**
+2. **point forecasts + distribution**
+]
+]
+
 
 ```
 #&gt; # A fable: 48 x 4 [1h] &lt;UTC&gt;

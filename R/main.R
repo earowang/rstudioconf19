@@ -304,6 +304,43 @@ elec_sub %>%
 ## ---- expand-forecast
 library(future)
 plan(multiprocess)
+expand_forecast <- function(...) {
+  as_tsibble(list(...), index = datetime, validate = FALSE) %>% 
+    model(ets = ETS(avg_kwh)) %>% 
+    forecast(h = "1 day")
+}
+subset_tsibble <- function(...) {
+  as_tsibble(list(...), index = datetime, validate = FALSE)
+}
+elec_dat <- elec_jan %>% 
+  pstretch(subset_tsibble, .size = 24, .init = 24 * 7)
+elec_fct <- elec_jan %>% 
+  future_pstretch(expand_forecast, .size = 24, .init = 168)
+
+## ---- anim-forecast
+p <- ggplot() 
+for (j in 1:length(elec_dat)) {
+  dat <- elec_dat[[j]]
+  fct <- elec_fct[[j]]
+  p <- p + geom_line(aes(x = datetime, y = avg_kwh), data = dat) +
+  geom_forecast(aes(x = datetime, y = avg_kwh, 
+    ymin = lower, ymax = upper, level = level),
+    fct, stat = "identity"
+  )
+}
+p_rolling <- p +
+  xlab("Time") +
+  ylab("Average kwH") +
+  theme_bw() +
+  transition_layers(
+    layer_length = 1, transition_length = 2, 
+    keep_layers = c(Inf, 0), from_blank = FALSE,
+  )
+anim_save("img/rolling.gif", p_rolling, width = 800, height = 250, nframes = 200)
+
+## ---- expand-forecast-2
+library(future)
+plan(multiprocess)
 subset_tsibble <- function(...) {
   as_tsibble(list(...), index = datetime, key = id(customer_id),
     validate = FALSE)
@@ -321,7 +358,7 @@ elec_dat <- elec_lst %>%
 elec_fct <- elec_lst %>% 
   map(~ future_pstretch(., expand_forecast, .size = 24, .init = 24 * 7))
 
-## ---- anim-forecast
+## ---- anim-forecast-2
 for (i in 1:4) {
   p <- ggplot() 
   for (j in 1:25) {

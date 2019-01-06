@@ -147,11 +147,12 @@ elec_ts %>% fill_gaps()
 ## Implicit missing value handlers
 
 .pull-left[
-<br>
+.div-middle[
 1. Check: `has_gaps()`
 2. Reveal: `scan_gaps()`
 3. Summarise: `count_gaps()`
 4. Fill in time gaps: `fill_gaps()`
+]
 ]
 .pull-right[
 .large[
@@ -206,20 +207,45 @@ Parallel processing prefix: `future_*`.
 
 ---
 
-.left-column[
 ## Rolling averages
+.pull-left[
+```{r, eval = FALSE, echo = TRUE}
+slide_dbl(x, ~ mean(.), 
+  .size = 24)
+```
+.div-middle[
+```{r, eval = FALSE, echo = TRUE}
+tile_dbl(x, ~ mean(.), 
+  .size = 24)
+```
 ]
-.right-column[
+.div-middle[
+```{r, eval = FALSE, echo = TRUE}
+stretch_dbl(x, ~ mean(.), 
+  .init = 24)
+```
+]
+]
+.pull-right[
+<img src="img/slide-mean.gif", height="160px">
+<img src="img/tile-mean.gif", height="160px">
+<img src="img/stretch-mean.gif", height="160px">
+]
+
+---
+
+## Rolling forecast
+
+```{r eval = FALSE, echo = TRUE}
+plan(multiprocess)
+expand_forecast <- function(...) {
+  # tidy forecasting ...
+}
+elec_avg %>% 
+  future_pstretch(expand_forecast, .size = 24, .init = 168)
+```
 .center[
-`slide_dbl(x, ~ mean(.), .size = 24)`
-<img src="img/slide-mean.gif" height=130px>
-<br>
-`tile_dbl(x, ~ mean(.), .size = 24)`
-<img src="img/tile-mean.gif" height=130px>
-<br>
-`stretch_dbl(x, ~ mean(.), .init = 24)`
-<img src="img/stretch-mean.gif" height=130px>
-]
+<img src="img/rolling.gif">
 ]
 
 ---
@@ -229,7 +255,7 @@ class: inverse middle center
 <img src="img/fable.png" height=280px>
 ]
 
-## Tidy happy forecasting
+## Tidy forecasting
 
 ---
 
@@ -270,7 +296,7 @@ class: inverse middle center
 ]
 .pull-right[
 .alert[
-1. **formula interface: <br> `response ~ model spec`**
+1. **model specification: <br> `response ~ model specials`**
 2. **automatic model selection**
 ]
 ]
@@ -297,7 +323,20 @@ that are described by coefficients.
 
 ## .blue[fable]: `forecast()` the future
 
-```{r forecast, echo = TRUE}
+.pull-left[
+```{r, eval = FALSE, echo = TRUE}
+elec_fbl <- elec_mbl %>% 
+  forecast(h = "1 day")
+```
+]
+.pull-right[
+.alert[
+1. **natural language support**
+2. **point forecasts + distribution**
+]
+]
+
+```{r forecast}
 ```
 
 ---
