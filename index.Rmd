@@ -120,6 +120,11 @@ class: inverse middle center
 
 1. <i class="fas fa-users"></i> **key**: identifying variables that determine subjects to be tracked over time
 2. <i class='far fa-clock'></i> **index**: a variable that represents time
+.center[
+.alert[
+**.red[1.] + .red[2.] determine distinct rows in a tsibble.**
+]
+]
 
 ---
 
@@ -127,6 +132,12 @@ class: inverse middle center
 
 ```{r print, highlight.output = 1:2}
 ```
+
+.center[
+.card[.large[time interval]]
+.card[.large[time zone of date-times]]
+.card[.large[the number of subjects]]
+]
 
 ---
 
@@ -281,7 +292,7 @@ class: inverse middle center
 
 ---
 
-## .blue[mable]: the `model()` generic
+## .blue[mable]: `model()` the data
 
 ```{r model, echo = TRUE, results = "hide"}
 ```
@@ -314,7 +325,7 @@ that are described by coefficients.
 ## Inspect mable
 
 1. `tidy()` model parameters
-2. `glance()` a one-row per model summary 
+2. `glance()` a one-row per model summary
 3. `augment()` with model fits (`.fitted` & `.resid`)
 ```{r tidy}
 ```
@@ -394,6 +405,29 @@ Models are fundamentally scalable
 * Simulation `simulate()`
 * Interpolation `interpolate()`
 * Refitting and streaming `refit()` & `stream()`
+
+---
+class: middle
+
+.pull-left[
+## 3 tibbles
+
+1. tsibble (`tsibble()`)
+2. mable (`model()`)
+3. fable (`forecast()`)
+
+Linkage via key
+]
+
+.pull-right[
+## 3 Fs
+
+1. fluid
+2. fluent
+3. flexible
+
+Tidy API for time series
+]
 
 ---
 

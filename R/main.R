@@ -11,8 +11,7 @@ elec_tbl
 ## ---- coerce
 elec_ts <- elec_tbl %>% 
   as_tsibble(
-    key = id(customer_id),
-    index = reading_datetime
+    key = id(customer_id), index = reading_datetime
   )
 
 ## ---- print
