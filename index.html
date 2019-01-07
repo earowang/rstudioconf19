@@ -19,12 +19,11 @@ class: center, middle, inverse, title-slide
 
 ---
 
+class: middle
 
 
 
 
-
-## Today we'll learn
 
 .center[
 ### 1 tidy unified time series workflow ‼️
@@ -68,7 +67,7 @@ The underlying data structure: [tibble]()
 ![](img/r4ts.svg)
 ]
 
-The mésalliance between temporal data and time series models
+The [mésalliance]() between temporal data and time series models
 
 ---
 
@@ -100,7 +99,7 @@ The underlying data structure: [tsibble]()
 ```
 
 .center[
-.card[.large[many subjects]]
+.card[.large[many series]]
 .card[.large[many measurements]]
 .card[.large[fine time resolutions]]
 ]
@@ -114,7 +113,7 @@ class: inverse middle center
 &lt;img src="img/tsibble.png" height=280px&gt;
 ]
 
-## A modern reimagining of the time series
+## A modern reimagining of time series
 
 ---
 
@@ -128,12 +127,10 @@ elec_ts &lt;- elec_tbl %&gt;%
   )
 ```
 
-1. &lt;i class='far fa-clock'&gt;&lt;/i&gt; **index**: a variable that represents time
-2. &lt;i class="fas fa-users"&gt;&lt;/i&gt; **key**: identifying variables that define series
+1. &lt;i class='far fa-clock'&gt;&lt;/i&gt; **index**: a variable that represents **time**
+2. &lt;i class="fas fa-users"&gt;&lt;/i&gt; **key**: identifying variables that define **series**
 .center[
-.alert[
-**.red[1.] + .red[2.] determine distinct rows in a tsibble.**
-]
+*.red[1.] + .red[2.] determine distinct rows in a tsibble.*
 ]
 
 ---
@@ -159,7 +156,7 @@ elec_ts &lt;- elec_tbl %&gt;%
 .center[
 .card[.large[time interval]]
 .card[.large[time zone of date-times]]
-.card[.large[the number of subjects]]
+.card[.large[the number of series]]
 ]
 
 ---
@@ -306,7 +303,7 @@ stretch_dbl(x, ~ mean(.),
 ```r
 plan(multiprocess)
 expand_forecast &lt;- function(...) {
-  # tidy forecasting ...
+  # 3 lines of tidy forecasting code ...
 }
 elec_avg %&gt;% 
   future_pstretch(expand_forecast, .size = 24, .init = 168)
@@ -329,7 +326,7 @@ class: inverse middle center
 ## Why fable?
 
 &gt; 1. It makes forecasting tables.
-&gt; 2. A fable is never true, but it tells you something important about reality.
+&gt; 2. A fable is like a forecast: it's never true, but it tells you something important about reality.
 &gt;
 &gt; **Rob J Hyndman**
 
@@ -349,29 +346,32 @@ class: inverse middle center
 ## .blue[mable]: `model()` the data
 
 
+
+.small[
+
 ```r
 elec_mbl &lt;- elec_jan %&gt;% 
-  model(naive = SNAIVE(avg_kwh), ets = ETS(avg_kwh)) %&gt;%
-  print()
+  model(
+    yesterday = NAIVE(avg_kwh ~ lag("1 day")), 
+    ets = ETS(avg_kwh)
+  )
 ```
+]
 
 .pull-left[
 ```
 #&gt; # A mable: 1 x 2
-#&gt;   naive    ets         
-#&gt;   &lt;model&gt;  &lt;model&gt;     
-#&gt; 1 &lt;SNAIVE&gt; &lt;ETS(M,N,M)&gt;
+#&gt;   yesterday ets         
+#&gt;   &lt;model&gt;   &lt;model&gt;     
+#&gt; 1 &lt;SNAIVE&gt;  &lt;ETS(M,N,M)&gt;
 ```
 ]
 .pull-right[
 .alert[
-1. **model specification: &lt;br&gt; `response ~ model specials`**
-2. **automatic model selection**
+1. **succinct model representation**
+2. **`summarise()` semantics: reduces rows**
 ]
 ]
-
-* succinct model representations
-* `summarise()` semantics: reduces rows
 
 ???
 
@@ -388,12 +388,12 @@ that are described by coefficients.
 
 ```
 #&gt; # A tibble: 27 x 4
-#&gt;   .model term  estimate std.error
-#&gt;   &lt;chr&gt;  &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;
-#&gt; 1 naive  b        0             0
-#&gt; 2 ets    alpha    0.882        NA
-#&gt; 3 ets    gamma    0.118        NA
-#&gt; 4 ets    l        0.385        NA
+#&gt;   .model    term  estimate std.error
+#&gt;   &lt;chr&gt;     &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+#&gt; 1 yesterday b        0             0
+#&gt; 2 ets       alpha    0.882        NA
+#&gt; 3 ets       gamma    0.118        NA
+#&gt; 4 ets       l        0.385        NA
 #&gt; # … with 23 more rows
 ```
 
@@ -419,12 +419,12 @@ elec_fbl &lt;- elec_mbl %&gt;%
 ```
 #&gt; # A fable: 48 x 4 [1h] &lt;UTC&gt;
 #&gt; # Key:     .model [2]
-#&gt;   .model datetime            avg_kwh .distribution 
-#&gt;   &lt;chr&gt;  &lt;dttm&gt;                &lt;dbl&gt; &lt;dist&gt;        
-#&gt; 1 naive  2013-01-31 00:00:00   0.179 N(0.18, 0.031)
-#&gt; 2 naive  2013-01-31 01:00:00   0.164 N(0.16, 0.031)
-#&gt; 3 naive  2013-01-31 02:00:00   0.158 N(0.16, 0.031)
-#&gt; 4 naive  2013-01-31 03:00:00   0.151 N(0.15, 0.031)
+#&gt;   .model    datetime            avg_kwh .distribution 
+#&gt;   &lt;chr&gt;     &lt;dttm&gt;                &lt;dbl&gt; &lt;dist&gt;        
+#&gt; 1 yesterday 2013-01-31 00:00:00   0.179 N(0.18, 0.031)
+#&gt; 2 yesterday 2013-01-31 01:00:00   0.164 N(0.16, 0.031)
+#&gt; 3 yesterday 2013-01-31 02:00:00   0.158 N(0.16, 0.031)
+#&gt; 4 yesterday 2013-01-31 03:00:00   0.151 N(0.15, 0.031)
 #&gt; # … with 44 more rows
 ```
 
@@ -432,7 +432,7 @@ elec_fbl &lt;- elec_mbl %&gt;%
 
 .left-column[
 ## Visualise fable .large[`geom_forecast()`]
-### - Naive
+### - Yesterday
 ]
 .right-column[
 &lt;img src="figure/vis-naive-1.svg" style="display: block; margin: auto;" /&gt;
@@ -442,7 +442,7 @@ elec_fbl &lt;- elec_mbl %&gt;%
 
 .left-column[
 ## Visualise fable .large[`geom_forecast()`]
-### - Naive
+### - Yesterday
 ### - ETS
 ]
 .right-column[
@@ -460,10 +460,10 @@ accuracy(elec_fbl, elec_jan31)
 
 ```
 #&gt; # A tibble: 2 x 8
-#&gt;   .model Type      ME   RMSE    MAE   MPE  MAPE  ACF1
-#&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-#&gt; 1 ets    Test  0.0681 0.0866 0.0681  18.5  18.5 0.906
-#&gt; 2 naive  Test  0.0700 0.0972 0.0700  17.3  17.3 0.942
+#&gt;   .model   Type      ME   RMSE    MAE   MPE  MAPE  ACF1
+#&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#&gt; 1 ets      Test  0.0681 0.0866 0.0681  18.5  18.5 0.906
+#&gt; 2 yesterd… Test  0.0700 0.0972 0.0700  17.3  17.3 0.942
 ```
 
 ---
@@ -495,14 +495,14 @@ Models are fundamentally scalable
 * Refitting and streaming `refit()` &amp; `stream()`
 
 ---
-class: middle
 
 ## Takeaways
 
+.div-middle[
 .pull-left[
 ## 3 tibbles
 
-1. tsibble (`tsibble()`)
+1. tsibble (`as_tsibble()`)
 2. mable (`model()`)
 3. fable (`forecast()`)
 
@@ -517,6 +517,7 @@ Linkage via key
 3. flexible
 
 Tidy API for time series
+]
 ]
 
 ---
@@ -547,7 +548,7 @@ Mitchell O'Hara‑Wild &lt;br&gt;
 class: middle center
 
 .card[
-.tidyverts[tidyver.orange[ts].org]
+[.tidyverts[tidyver.orange[ts].org]](http://tidyverts.org)
 ]
 .card[
 ![](img/tsibble.png)

@@ -10,10 +10,10 @@
                 <text id="Import" font-family="HelveticaNeue, Helvetica Neue" font-size="26" font-weight="normal" fill="#000000">
                     <tspan x="53.0785689" y="46">Import</tspan>
                 </text>
-                <text id="Temporal-data" font-family="HelveticaNeue-Italic, Helvetica Neue" font-size="26" font-style="italic" font-weight="normal" fill="#000000">
+                <text id="Temporal-data" font-family="HelveticaNeue-Italic, Helvetica Neue" font-size="26" font-style="italic" font-weight="normal" fill="#F9260B">
                     <tspan x="246.508569" y="47">Temporal data</tspan>
                 </text>
-                <text id="Current-time-series" font-family="HelveticaNeue-Italic, Helvetica Neue" font-size="26" font-style="italic" font-weight="normal" fill="#000000">
+                <text id="Current-time-series" font-family="HelveticaNeue-Italic, Helvetica Neue" font-size="26" font-style="italic" font-weight="normal" fill="#F9260B">
                     <tspan x="676.635569" y="323">Current time </tspan>
                     <tspan x="668.965569" y="354">series objects</tspan>
                 </text>

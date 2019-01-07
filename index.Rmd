@@ -14,6 +14,7 @@ output:
       highlightLines: true
       countIncrementalSlides: false
 ---
+class: middle
 
 ```{r initial, echo = FALSE, cache = FALSE, results = 'hide'}
 library(knitr)
@@ -30,8 +31,6 @@ read_chunk('R/main.R')
 
 ```{r theme-remark}
 ```
-
-## Today we'll learn
 
 .center[
 ### 1 tidy unified time series workflow `r emo::ji("bangbang")`
@@ -75,7 +74,7 @@ The underlying data structure: [tibble]()
 ![](img/r4ts.svg)
 ]
 
-The mésalliance between temporal data and time series models
+The [mésalliance]() between temporal data and time series models
 
 ---
 
@@ -95,7 +94,7 @@ The underlying data structure: [tsibble]()
 ```
 
 .center[
-.card[.large[many subjects]]
+.card[.large[many series]]
 .card[.large[many measurements]]
 .card[.large[fine time resolutions]]
 ]
@@ -109,7 +108,7 @@ class: inverse middle center
 <img src="img/tsibble.png" height=280px>
 ]
 
-## A modern reimagining of the time series
+## A modern reimagining of time series
 
 ---
 
@@ -118,12 +117,10 @@ class: inverse middle center
 ```{r coerce, echo = TRUE}
 ```
 
-1. <i class='far fa-clock'></i> **index**: a variable that represents time
-2. <i class="fas fa-users"></i> **key**: identifying variables that define series
+1. <i class='far fa-clock'></i> **index**: a variable that represents **time**
+2. <i class="fas fa-users"></i> **key**: identifying variables that define **series**
 .center[
-.alert[
-**.red[1.] + .red[2.] determine distinct rows in a tsibble.**
-]
+*.red[1.] + .red[2.] determine distinct rows in a tsibble.*
 ]
 
 ---
@@ -136,7 +133,7 @@ class: inverse middle center
 .center[
 .card[.large[time interval]]
 .card[.large[time zone of date-times]]
-.card[.large[the number of subjects]]
+.card[.large[the number of series]]
 ]
 
 ---
@@ -250,7 +247,7 @@ stretch_dbl(x, ~ mean(.),
 ```{r eval = FALSE, echo = TRUE}
 plan(multiprocess)
 expand_forecast <- function(...) {
-  # tidy forecasting ...
+  # 3 lines of tsibble + fable code ...
 }
 elec_avg %>% 
   future_pstretch(expand_forecast, .size = 24, .init = 168)
@@ -273,7 +270,7 @@ class: inverse middle center
 ## Why fable?
 
 > 1. It makes forecasting tables.
-> 2. A fable is never true, but it tells you something important about reality.
+> 2. A fable is like a forecast: it's never true, but it tells you something important about reality.
 >
 > **Rob J Hyndman**
 
@@ -294,26 +291,33 @@ class: inverse middle center
 
 ## .blue[mable]: `model()` the data
 
-```{r model, echo = TRUE, results = "hide"}
+```{r model, echo = FALSE, results = "hide"}
 ```
+
+.small[
+```{r, eval = FALSE, echo = TRUE}
+elec_mbl <- elec_jan %>% 
+  model(
+    yesterday = NAIVE(avg_kwh ~ lag("1 day")), 
+    ets = ETS(avg_kwh)
+  )
+```
+]
 
 .pull-left[
 ```
 #> # A mable: 1 x 2
-#>   naive    ets         
-#>   <model>  <model>     
-#> 1 <SNAIVE> <ETS(M,N,M)>
+#>   yesterday ets         
+#>   <model>   <model>     
+#> 1 <SNAIVE>  <ETS(M,N,M)>
 ```
 ]
 .pull-right[
 .alert[
-1. **model specification: <br> `response ~ model specials`**
-2. **automatic model selection**
+1. **succinct model representation**
+2. **`summarise()` semantics: reduces rows**
 ]
 ]
-
-* succinct model representations
-* `summarise()` semantics: reduces rows
 
 ???
 
@@ -354,7 +358,7 @@ elec_fbl <- elec_mbl %>%
 
 .left-column[
 ## Visualise fable .large[`geom_forecast()`]
-### - Naive
+### - Yesterday
 ]
 .right-column[
 ```{r vis-naive}
@@ -365,7 +369,7 @@ elec_fbl <- elec_mbl %>%
 
 .left-column[
 ## Visualise fable .large[`geom_forecast()`]
-### - Naive
+### - Yesterday
 ### - ETS
 ]
 .right-column[
@@ -407,14 +411,14 @@ Models are fundamentally scalable
 * Refitting and streaming `refit()` & `stream()`
 
 ---
-class: middle
 
 ## Takeaways
 
+.div-middle[
 .pull-left[
 ## 3 tibbles
 
-1. tsibble (`tsibble()`)
+1. tsibble (`as_tsibble()`)
 2. mable (`model()`)
 3. fable (`forecast()`)
 
@@ -429,6 +433,7 @@ Linkage via key
 3. flexible
 
 Tidy API for time series
+]
 ]
 
 ---
@@ -459,7 +464,7 @@ Mitchell O'Hara‑Wild <br>
 class: middle center
 
 .card[
-.tidyverts[tidyver.orange[ts].org]
+[.tidyverts[tidyver.orange[ts].org]](http://tidyverts.org)
 ]
 .card[
 ![](img/tsibble.png)

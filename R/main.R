@@ -209,7 +209,10 @@ elec_jan %>%
 
 ## ----- model
 elec_mbl <- elec_jan %>% 
-  model(naive = SNAIVE(avg_kwh), ets = ETS(avg_kwh)) %>%
+  model(
+    yesterday = NAIVE(avg_kwh ~ lag("1 day")), 
+    ets = ETS(avg_kwh)
+  ) %>%
   print()
 
 ## ---- tidy
@@ -230,8 +233,9 @@ elec_fbl <- elec_mbl %>%
 # autoplot(elec_fbl, data = elec_jan)
 elec_ftf <- elec_fbl %>% 
   fortify() %>% 
-  filter(.model == "naive") %>% 
+  filter(.model == "yesterday") %>% 
   mutate(date = as_date(datetime), hour = hour(datetime))
+ylims <- round(c(min(elec_ftf$lower), max(elec_avg$avg_kwh)), 2)
 elec_jan %>% 
   ggplot(aes(x = hour, y = avg_kwh)) +
   geom_line(size = 1.2) +
@@ -240,6 +244,7 @@ elec_jan %>%
     elec_ftf, stat = "identity", size = 1.2
   ) +
   sugrrants::facet_calendar(~ date) +
+  ylim(ylims) +
   theme_remark()
 
 # elec_jan %>% 
@@ -262,6 +267,7 @@ elec_jan %>%
     elec_ftf, stat = "identity", size = 1.2
   ) +
   sugrrants::facet_calendar(~ date) +
+  ylim(ylims) +
   theme_remark()
 
 ## ----- accuracy
