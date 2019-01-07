@@ -118,8 +118,8 @@ class: inverse middle center
 ```{r coerce, echo = TRUE}
 ```
 
-1. <i class="fas fa-users"></i> **key**: identifying variables that determine subjects to be tracked over time
-2. <i class='far fa-clock'></i> **index**: a variable that represents time
+1. <i class='far fa-clock'></i> **index**: a variable that represents time
+2. <i class="fas fa-users"></i> **key**: identifying variables that define series
 .center[
 .alert[
 **.red[1.] + .red[2.] determine distinct rows in a tsibble.**
@@ -408,6 +408,8 @@ Models are fundamentally scalable
 
 ---
 class: middle
+
+## Takeaways
 
 .pull-left[
 ## 3 tibbles

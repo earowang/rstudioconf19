@@ -65,14 +65,15 @@ anim_save("img/slide.gif", p_slide, width = 800, height = 250)
 
 ## ---- sliding-average
 elec_slide_mean <- elec_jan %>% 
-  mutate(ma_kwh24 = slide_dbl(avg_kwh, ~ mean(.x), .size = 24, .align = "cl"))  %>% 
-  ggplot(aes(x = datetime,  y = ma_kwh24)) +
-  geom_point(size = 2) +
-  geom_line(size = 1.2) +
+  mutate(ma_kwh24 = slide_dbl(avg_kwh, ~ mean(.x), .size = 24, .align = "cl"))
+elec_slide_mean <- ggplot() +
+  geom_line(aes(x = datetime, y = avg_kwh), data = elec_jan, colour = "grey", size = 1.2) +
+  geom_point(aes(x = datetime, y = ma_kwh24), data = elec_slide_mean %>% mutate(group = row_number()), size = 2, colour = "#de2d26") +
+  geom_line(aes(x = datetime, y = ma_kwh24), data = elec_slide_mean %>% mutate(group = row_number()), size = 1.2, colour = "#de2d26") +
   xlab("Time") +
   ylab("Average kwH") +
   theme_bw() +
-  transition_reveal(datetime)
+  transition_reveal(group)
 anim_save("img/slide-mean.gif", elec_slide_mean, width = 800, height = 250)
 
 ## ---- tile-animate
@@ -98,14 +99,15 @@ elec_tile_mean <-
   tibble(
     datetime = make_datetime(2013, 1, 1:15, hour = 12),
     ma_kwh24 = tile_dbl(elec_jan$avg_kwh, ~ mean(.x), .size = 24)
-  ) %>% 
-  ggplot(aes(x = datetime,  y = ma_kwh24)) +
-  geom_point(size = 2) +
-  geom_line(size = 1.2) +
+  )
+elec_tile_mean <- ggplot() +
+  geom_line(aes(x = datetime, y = avg_kwh), data = elec_jan, colour = "grey", size = 1.2) +
+  geom_point(aes(x = datetime, y = ma_kwh24), data = elec_tile_mean %>% mutate(group = row_number()), size = 2, colour = "#de2d26") +
+  geom_line(aes(x = datetime, y = ma_kwh24), data = elec_tile_mean %>% mutate(group = row_number()), size = 1.2, colour = "#de2d26") +
   xlab("Time") +
   ylab("Average kwH") +
   theme_bw() +
-  transition_reveal(datetime)
+  transition_reveal(group)
 anim_save("img/tile-mean.gif", elec_tile_mean, width = 800, height = 250)
 
 ## ---- stretch-animate
@@ -128,14 +130,15 @@ anim_save("img/stretch.gif", p_stretch, width = 800, height = 250)
 
 ## ---- stretch-average
 elec_stretch_mean <- elec_jan %>% 
-  mutate(ma_kwh24 = c(rep(NA_real_, 23), stretch_dbl(avg_kwh, ~ mean(.x), .init = 24)))  %>% 
-  ggplot(aes(x = datetime,  y = ma_kwh24)) +
-  geom_point(size = 2) +
-  geom_line(size = 1.2) +
+  mutate(ma_kwh24 = c(rep(NA_real_, 23), stretch_dbl(avg_kwh, ~ mean(.x), .init = 24)))
+elec_stretch_mean <- ggplot() +
+  geom_line(aes(x = datetime, y = avg_kwh), data = elec_jan, colour = "grey", size = 1.2) +
+  geom_point(aes(x = datetime, y = ma_kwh24), data = elec_stretch_mean %>% mutate(group = row_number()), size = 2, colour = "#de2d26") +
+  geom_line(aes(x = datetime, y = ma_kwh24), data = elec_stretch_mean %>% mutate(group = row_number()), size = 1.2, colour = "#de2d26") +
   xlab("Time") +
   ylab("Average kwH") +
   theme_bw() +
-  transition_reveal(datetime)
+  transition_reveal(group)
 anim_save("img/stretch-mean.gif", elec_stretch_mean, width = 800, height = 250)
 
 ## ---- window-table
