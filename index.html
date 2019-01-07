@@ -303,7 +303,7 @@ stretch_dbl(x, ~ mean(.),
 ```r
 plan(multiprocess)
 expand_forecast &lt;- function(...) {
-  # 3 lines of tidy forecasting code ...
+  # 3 lines of tsibble + fable code ...
 }
 elec_avg %&gt;% 
   future_pstretch(expand_forecast, .size = 24, .init = 168)
@@ -500,23 +500,24 @@ Models are fundamentally scalable
 
 .div-middle[
 .pull-left[
-## 3 tibbles
+### 3 tibbles
 
-1. tsibble (`as_tsibble()`)
-2. mable (`model()`)
-3. fable (`forecast()`)
-
-Linkage via key
+1. tsibble
+2. mable
+3. fable
 ]
 
 .pull-right[
-## 3 Fs
+### 3 steps
 
-1. fluid
-2. fluent
-3. flexible
 
-Tidy API for time series
+```r
+as_tsibble() %&gt;% 
+  model() %&gt;% 
+  forecast()
+```
+
+Tidy time series workflow
 ]
 ]
 

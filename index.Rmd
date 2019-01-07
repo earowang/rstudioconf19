@@ -416,23 +416,23 @@ Models are fundamentally scalable
 
 .div-middle[
 .pull-left[
-## 3 tibbles
+### 3 tibbles
 
-1. tsibble (`as_tsibble()`)
-2. mable (`model()`)
-3. fable (`forecast()`)
-
-Linkage via key
+1. tsibble
+2. mable
+3. fable
 ]
 
 .pull-right[
-## 3 Fs
+### 3 steps
 
-1. fluid
-2. fluent
-3. flexible
+```{r, eval = FALSE, echo = TRUE}
+as_tsibble() %>% 
+  model() %>% 
+  forecast()
+```
 
-Tidy API for time series
+Tidy time series workflow
 ]
 ]
 
