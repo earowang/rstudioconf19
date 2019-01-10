@@ -302,7 +302,7 @@ to fill in those time gaps at the first place.
 
 ---
 
-## A new adjective `index_by()`: time-aware grouping
+## A new adverb `index_by()`: time-aware grouping
 
 
 ```r
@@ -325,7 +325,7 @@ elec_avg &lt;- elec_ts %&gt;%
 
 ???
 
-Tsibble works nicely with dplyr and tidyr verbs. A new adjective you will use 
+Tsibble works nicely with dplyr and tidyr verbs. A new adverb you will use 
 quite often is `index_by()`. It's similar to `group_by()` by preparing grouping str,
 but it only groups the index. Combined with `summarise()`, the data can be
 aggregated to any higher-level time resolutions.
@@ -534,6 +534,8 @@ elec_mbl &lt;- elec_jan %&gt;%
 
 ???
 
+Let's model the data.
+
 I construct two models for the tsibble data with the `model()` verb. The first
 model I built is a naive model as a benchmark. The naive method simply uses the
 observed values from yesterday as forecasts. The second model is ETS, exponential
@@ -721,8 +723,13 @@ tsibble. We are obviously interested in forecasting the demand for each househol
 simultaneously.
 
 No additional steps needed. Just as what we did before, we can directly pipe 
-them into `model()`, and it will fit a model for each time series at once. 
+them into `model()`, and it will fit an ets model for each time series at once. 
 and then happy `forecast()`. It produces the forecast for each individual customer.
+I also do a log transformation to ensure I get positive forecasts back. The `forecast()`
+will do a back-transformation automatically.
+
+Models are scalable but my slides are not. So I just include 4 customers in the
+data.
 
 It is just as easy as 1, 2, 3 lines of code.
 
@@ -837,6 +844,11 @@ class: middle center
 ![](img/Octocat.png)
 [github.com/earowang/rstudioconf19](https://github.com/earowang/rstudioconf19)
 ]
+
+???
+
+Useful links to these packages. I need to mention that the fable packages currently
+is on Github only.
     </textarea>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
