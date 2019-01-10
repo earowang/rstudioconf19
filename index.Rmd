@@ -53,8 +53,10 @@ read_chunk('R/main.R')
 
 ???
 
-I'll explain three big ideas or tibbles both abstractly and concretely with
-data examples.
+I want to talk about one streamlined workflow for ts under the tidyverse framework,
+using 2 packages. I'll explain three big ideas behind these 2 pkgs: they are
+tsibble, mable and fable and how they link together. I hope to explain them 
+concretely with data examples.
 
 ---
 
@@ -66,6 +68,16 @@ data examples.
 
 The underlying data structure: [tibble]()
 
+???
+
+I believe this diagram isn't foreign to you. This is the tidyverse model.
+Each module here is powered by one of the tidyverse packages. The tidyverse 
+plays nicely with each other. And one of the fundamental reasons is 
+they all share the same underlying data structure, which is data frame or tibble. 
+So the diagram actually places the data in the center.
+
+But why we cannot bring this workflow easily into time series?
+
 ---
 
 ## Current time series workflow
@@ -73,8 +85,18 @@ The underlying data structure: [tibble]()
 .center[
 ![](img/r4ts.svg)
 ]
+.center[
+![](img/adhoc.svg)
+]
 
-The [mésalliance]() between temporal data and time series models
+???
+
+Because the current time series objects in R are model-focused. By saying model,
+I mean it not only includes statistical models, but also forecasting,
+decomposition, autocorrelation function, and etc. They require matrices. But 
+the data arrives in the right beginning of this process, it rarely comes in the
+matrix form. We have to write so much ad hoc code get the data into a model-ready 
+time series object. It is a pain, bc of the mismatch
 
 ---
 
@@ -85,6 +107,35 @@ The [mésalliance]() between temporal data and time series models
 ]
 
 The underlying data structure: [tsibble]()
+
+???
+
+Some new tools are provided to streamline this workflow and make time series
+analysis a bit easier. The tsibble pkg will focus on
+the tidy and transform part, the fable package will do time series modelling and
+forecasting. The visualisation is done with ggplot2 and its ext.
+
+For some of you who are ts practitioners, there's no more coercion b/t data frame
+and a time series object. For those who are new to time series, more intuitively,
+fun and easier
+
+To make this workflow work, they're going to share the same underlying data
+str, which is a new data abstraction for time series.
+
+---
+class: inverse middle center
+
+.animated.bounce[
+<img src="img/tsibble.png" height=280px>
+]
+
+## A modern reimagining of time series
+
+???
+
+We call it "tsibble", which is a time series tibble. If you know, ts is 
+the native object to represent time series in R, so this is where the name 
+tsibble comes from.
 
 ---
 
@@ -99,16 +150,18 @@ The underlying data structure: [tsibble]()
 .card[.large[fine time resolutions]]
 ]
 
-.footnote[[Data source: Department of the Environment and Energy, Australia](https://data.gov. au/dataset/4e21dea3-9b87-4610-94c7-15a8a77907ef)]
+.footnote[[Data source: Department of the Environment and Energy, Australia](https://data.gov.au/dataset/4e21dea3-9b87-4610-94c7-15a8a77907ef)]
 
----
-class: inverse middle center
+???
 
-.animated.bounce[
-<img src="img/tsibble.png" height=280px>
-]
-
-## A modern reimagining of time series
+Now we're going to have some fun with an open dataset. This dataset is about residential
+electricity consumption in Australia. It's a tibble with 46M obs and 8 variables.
+The column `customer_id` includes unique identifiers for each household;
+thousands of households in this data. And `reading_datetime` gives the 
+timestamps when the reading is recorded basically every 30 mins. `general_supply` is the 
+variable that we're interested in forecasting. There are some other 
+measurements in the table as well. How are we going to turn this data into a
+tsibble.
 
 ---
 
@@ -123,6 +176,21 @@ class: inverse middle center
 *.red[1.] + .red[2.] determine distinct rows in a tsibble.*
 ]
 
+???
+
+What makes time series different from a tibble? Bc it has its own semantics.
+
+The first is obviously the index variable that represents time. In this case,
+it's `reading_datetime`. It supports a wide range of time classes, from numerics
+to nanotime, to even ordered factors. The second component is what we call "key". They are
+identifying variables that define series or entities over time. For this example,
+each household is a series and the key variable is `customer_id`.
+
+Index defines the time and key defines the series.
+
+The key together with the index uniquely identifies each observation in a tibble.
+Basically it means each customer has to have unique timestamps.
+
 ---
 
 ## Contextual pretty printing
@@ -135,6 +203,16 @@ class: inverse middle center
 .card[.large[time zone of date-times]]
 .card[.large[the number of series]]
 ]
+
+???
+
+Tibble gives a very nice printing and tsibble is going to enhance that by adding
+contextual information. Now we have a tsibble with its data dimensions. It
+recognises 30 min interval and the time zone associated with the index. Here we
+have UTC, so makes the life a bit easier.
+
+The key variable is reported with the number of series. We have 2,924 customers
+in this big table.
 
 ---
 
@@ -149,6 +227,13 @@ elec_ts %>% fill_gaps()
 
 ```{r fill-gaps, fig.height = 2.3}
 ```
+
+???
+
+We have some time gaps in this data. They are implicit missing values. Since
+ggplot2 isn't aware of these gaps, it always draws a straight line between data
+segments. Tsibble comes with a handy function `fill_gaps()`. It's a simple call
+to fill in these gaps with `NA` by default or you can do by values or functions.
 
 ---
 
@@ -172,12 +257,32 @@ has_gaps(elec_ts)
 ]
 ]
 
+???
+
+Except for `fill_gaps()`, tsibble provides other three verbs to handle implicit
+missing values. They are all suffixed by `_gaps()`. Nearly 20% of customers have
+time gaps. Almost all model functions require a complete series. So it's nice
+to fill in those time gaps at the first place.
+
 ---
 
 ## A new adjective `index_by()`: time-aware grouping
 
-```{r index-by, echo = TRUE}
+```{r index-by, echo = TRUE, highlight.output = 1}
 ```
+
+???
+
+Tsibble works nicely with dplyr and tidyr verbs. A new adjective you will use 
+quite often is `index_by()`. It's similar to `group_by()` by preparing grouping str,
+but it only groups the index. Combined with `summarise()`, the data can be
+aggregated to any higher-level time resolutions.
+
+For example, I want to work with hourly data instead of 30 mins. Then I use
+`floor_date()`/`celling_date()`/`round_date()` from the lubridate pkg on the 
+index inside the `index_by()`, followed by `summarise()`. I'll get hourly 
+average electricity usage across all the households. The result is going to a 
+single time series at one hour interval.
 
 ---
 
@@ -194,6 +299,12 @@ has_gaps(elec_ts)
 .right-column[
 <div style="width:100%;height:0;padding-bottom:64%;position:relative;"><iframe src="https://giphy.com/embed/xoSaxIp8f9JPa" width="100%" height="100%" style="position:absolute" frameBorder="0" class="giphy-embed" allowFullScreen></iframe></div><p><a href="https://giphy.com/gifs/cat-rolls-xoSaxIp8f9JPa"></a></p>
 ]
+
+???
+
+Another chunk of operations for time series is definitely rolling window. It
+not only does iteration over each element, but also needs to roll. What I'm going
+to do is to wake up this cat, and let her roll.
 
 ---
 
@@ -212,6 +323,18 @@ Type stability suffix: `*_dbl()`, `*_int()`, `*_lgl()`, `*_chr()`
 
 Parallel processing prefix: `future_*`.
 ]
+
+???
+
+Actually there are 3 different types of rolling operations: sliding, tiling,
+and stretching. It's just like purrr, `slide()` takes a single input, `slide2()` takes
+two inputs and `pslide()` for multiples. For the purpose of type stability,
+they are going to return a list. And in the recent version, I've added the
+parallel support, they are all prefixed with `future_` by using the furrr package
+by Davis as a backend. If doing some rolling regression, it's nice to save some time by 
+rolling in parallel.
+
+You can put an arbitrary function to these rolling window.
 
 ---
 
@@ -240,6 +363,13 @@ stretch_dbl(x, ~ mean(.),
 <img src="img/stretch-mean.gif", height="160px">
 ]
 
+???
+
+A simple example is rolling average. Again, it uses purrr-like syntax, by calling
+a function or a formula. I specify the window size to be 24 and it's rolling
+forward from left to right. If you want to move in an opposite direction, just
+change the window size to be negative.
+
 ---
 
 ## Rolling forecast
@@ -256,6 +386,16 @@ elec_avg %>%
 <img src="img/rolling.gif">
 ]
 
+???
+
+A more advanced example, but extremely useful is rolling forecast. I defined
+a custom function called `expand_forecast()` and also enabled parallel processing
+by using `future_pstretch()`. It's never been that easy to do a expanding forecast.
+A nice thing about functional programming, we can focus on expressions or actions,
+rather than wring a long for-loop statement. So what sort of code goes into the 
+`expand_forecast()`. This Q brings us to the next part of the presentation: 
+tidy forecasting.
+
 ---
 class: inverse middle center
 
@@ -265,6 +405,12 @@ class: inverse middle center
 
 ## Tidy forecasting
 
+???
+
+How many of you have used the forecast package before?
+
+The fable is the tidy replacement of the forecast.
+
 ---
 
 ## Why fable?
@@ -273,6 +419,10 @@ class: inverse middle center
 > 2. A fable is like a forecast: it's never true, but it tells you something important about reality.
 >
 > **Rob J Hyndman**
+
+???
+
+Why we call it fable?
 
 ---
 
@@ -286,6 +436,15 @@ class: inverse middle center
 ```{r calendar-train}
 ```
 ]
+
+???
+
+Let's look at the data in the first 30 days of January. Each facet gives
+a daily pattern of electricity demand. The peak in the late afternoon is primarily
+driven by the use of air conditioning. January is summer time in Australia. You
+can see some days have much higher usage, most likely they are very hot days.
+I'm going to use this subset to forecast the demand one day ahead. And I hold 
+the data of Jan 31 as the test set.
 
 ---
 
@@ -306,7 +465,7 @@ elec_mbl <- elec_jan %>%
 
 .pull-left[
 ```
-#> # A mable: 1 x 2
+*#> # A mable: 1 x 2
 #>   yesterday ets         
 #>   <model>   <model>     
 #> 1 <SNAIVE>  <ETS(M,N,M)>
@@ -321,6 +480,24 @@ elec_mbl <- elec_jan %>%
 
 ???
 
+I construct two models for the tsibble data with the `model()` verb. The first
+model I built is a naive model as a benchmark. The naive method simply uses the
+observed values from yesterday as forecasts. The second model is ETS, exponential
+smoothing, which can be thought of as a weighted average of the past values.
+ETS is also short for error, trend and seasonality. The
+model function uses the formula interface. On the LHS, we specify the average 
+supply as the response variable, and on the RHS we can put some specials related
+to the method. I've specified the naive function to use the 24 values from yesterday instead
+of the value from the previous hour. If we don't specify the RHS like ets, it will do 
+automatic model selection by picking up the best model for you.
+
+Now we have a mable back. A mable is a model table that contains model objects.
+It gives a succinct model representation by saying I have a seasonal naive
+model and an ets with certain components.
+
+The `model()` is an analogue of the `summarise()` semantics, because it also reduces the data
+down to a single summary but it happens to a model object of that summary.
+
 Models are reduced representations of the data down to simplistic structures 
 that are described by coefficients.
 
@@ -331,8 +508,16 @@ that are described by coefficients.
 1. `tidy()` model parameters
 2. `glance()` a one-row per model summary
 3. `augment()` with model fits (`.fitted` & `.resid`)
+
 ```{r tidy}
 ```
+
+???
+
+It's easy to extract parameter estimates, information criterion or residuals from
+a mable. We just use the familiar broom functions: `tidy()`, `glance()` and `augment()`.
+By applying the `tidy()` function on the mable, we get the parameter estimates
+for the models we have.
 
 ---
 
@@ -346,13 +531,26 @@ elec_fbl <- elec_mbl %>%
 ]
 .pull-right[
 .alert[
-1. **natural language support**
+1. **human-friendly specification**
 2. **point forecasts + distribution**
 ]
 ]
 
-```{r forecast}
+```{r forecast, highlight.output = 1:2}
 ```
+
+???
+
+It's time to forecast. We pipe the mable into the `forecast()`, and we're doing
+a one-day-ahead forecast. It supports human-friendly input, by reading forecast
+horizon is 1 day instead of 24. It's convenient,
+bc we no longer need to compute how many hours/minutes/seconds in a day.
+
+We're done with the forecast, we have a forecasting table, which is a fable. It's
+a special tsibble, which includes the future predications. It not only tells you
+the point forecasts, but also an underlying pred distribution that involves uncertainty.
+Bc we are forecasters, not fortune tellers.
+You can see the normal distribution with the mean and the standard deviation.
 
 ---
 
@@ -364,6 +562,13 @@ elec_fbl <- elec_mbl %>%
 ```{r vis-naive}
 ```
 ]
+
+???
+
+We'll see the forecasts more clearly with plots.
+
+The naive method repeats the yesterday's pattern, but the 80 and 95 PIs are quite 
+wide, and even goes below zero.
 
 ---
 
@@ -377,6 +582,10 @@ elec_fbl <- elec_mbl %>%
 ```
 ]
 
+???
+
+The ets nicely captures the daily trend and produces a much narrower PI.
+
 ---
 
 ## Assess model performance
@@ -384,9 +593,22 @@ elec_fbl <- elec_mbl %>%
 ```{r accuracy, echo = TRUE, error = TRUE}
 ```
 
+```{r pred-data, fig.height = 3}
+```
+
+???
+
+Which model performs better?
+
+By looking at accuracy measures, ets does slightly better than naive. But they
+all tend to give underestimated predications. Looks like it's another hot day in January.
+
+I have showed all the steps from model building to model assessments for just one
+time series. Would be any different if we have multiple time series?
+
 ---
 
-## Many model fits at once
+## Models are fundamentally scalable
 
 ```{r subset}
 ```
@@ -394,12 +616,36 @@ elec_fbl <- elec_mbl %>%
 ```{r batch, echo = TRUE}
 ```
 
-```{r batch-plot, fig.height = 4.5}
-```
-
 ???
 
-Models are fundamentally scalable
+My answer is No. Bc models are fundamentally scalable.
+
+Tsibble as a modern reimaging of time series, it designs for hosting many time
+series together. Especially the series have been defined when we created the
+tsibble. We are obviously interested in forecasting the demand for each household
+simultaneously.
+
+No additional steps needed. Just as what we did before, we can directly pipe 
+them into `model()`, and it will fit a model for each time series at once. 
+and then happy `forecast()`. It produces the forecast for each individual customer.
+
+It is just as easy as 1, 2, 3 lines of code.
+
+---
+
+## Key is the `r emo::ji("key")` to link tsibble, mable and fable
+
+.pull-left[
+<br>
+```{r batch-model}
+```
+]
+.pull-right[
+```{r batch-plot, fig.height = 13}
+```
+]
+
+???
 
 ---
 
@@ -410,7 +656,7 @@ Models are fundamentally scalable
 * Interpolation `interpolate()`
 * Refitting and streaming `refit()` & `stream()`
 
----
+???
 
 ## Takeaways
 
@@ -459,6 +705,10 @@ Mitchell O'Hara‑Wild <br>
 ]
 ]
 ]
+
+???
+
+It's the joint work w
 
 ---
 class: middle center

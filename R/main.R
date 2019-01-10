@@ -273,6 +273,17 @@ elec_jan %>%
 ## ----- accuracy
 accuracy(elec_fbl, elec_jan31)
 
+## ---- pred-data
+# autoplot(elec_fbl, level = 0, data = elec_jan31)
+elec_jan31 %>% 
+  ggplot(aes(x = datetime, y = avg_kwh)) +
+  geom_line(size = 1.2) +
+  geom_forecast(
+    aes(ymin = lower, ymax = upper, colour = .model),
+    fortify(elec_fbl, level = 0), stat = "identity", size = 1.2
+  ) +
+  scale_colour_brewer(palette = "Dark2")
+
 ## ----- subset
 set.seed(20190105)
 sel_id <- has_gaps(elec_ts) %>% 
@@ -284,22 +295,27 @@ elec_sub <- elec_ts %>%
   group_by_key() %>% 
   index_by(datetime = floor_date(reading_datetime, "hour")) %>%
   summarise(general_supply_kwh = sum(general_supply_kwh)) %>% 
-  filter_index(~ "2013-01-14")
+  filter_index(~ "2013-01-14") %>% 
+  print()
 
 ## ---- batch
 elec_fct <- elec_sub %>% 
   model(ets = ETS(log(general_supply_kwh))) %>% 
   forecast(h = "1 day")
 
+## ---- batch-model
+elec_sub %>% 
+  model(ets = ETS(log(general_supply_kwh)))
+
 ## ---- batch-plot
 elec_sub %>% 
   ggplot(aes(x = datetime, y = general_supply_kwh)) +
-  geom_line() +
+  geom_line(size = 1.2) +
   geom_forecast(
     aes(ymin = lower, ymax = upper, level = level),
-    elec_fct, stat = "identity"
+    elec_fct, stat = "identity", size = 1.2
   ) +
-  facet_wrap(~ customer_id, scales = "free_y", ncol = 2, labeller = "label_both") +
+  facet_wrap(~ customer_id, scales = "free_y", ncol = 1, labeller = "label_both") +
   xlab("Reading time") +
   ylab("General supply kwH") +
   theme_remark()
