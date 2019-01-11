@@ -78,6 +78,7 @@ But why we cannot bring this workflow easily into time series?
 .center[
 ![](img/r4ts.svg)
 ]
+&lt;hr&gt;
 .center[
 ![](img/adhoc.svg)
 ]
@@ -255,6 +256,7 @@ We have some time gaps in this data. They are implicit missing values. Since
 ggplot2 isn't aware of these gaps, it always draws a straight line between data
 segments. Tsibble comes with a handy function `fill_gaps()`. It's a simple call
 to fill in these gaps with `NA` by default or you can do by values or functions.
+So we can remove these lines from the plot.
 
 ---
 
@@ -355,8 +357,8 @@ single time series at one hour interval.
 ???
 
 Another chunk of operations for time series is definitely rolling window. It
-not only does iteration over each element, but also needs to roll. What I'm going
-to do is to wake up this cat, and let her roll.
+not only does iteration over each element like what `purrr::map()` does, but 
+also needs to roll. What I'm going to do is to wake up this cat, and let her roll.
 
 ---
 
@@ -640,7 +642,7 @@ You can see the normal distribution with the mean and the standard deviation.
 
 ???
 
-We'll see the forecasts more clearly with plots.
+We'll see the forecasts more clearly with plots using `geom_forecast()`.
 
 The naive method repeats the yesterday's pattern, but the 80 and 95 PIs are quite 
 wide, and even goes below zero.
@@ -684,7 +686,9 @@ accuracy(elec_fbl, elec_jan31)
 Which model performs better?
 
 By looking at accuracy measures, ets does slightly better than naive. But they
-all tend to give underestimated predications. Looks like it's another hot day in January.
+all tend to give underestimated predications. The blank line in the plot is
+the actual data. Looks like it's another hot day in January. If we have weather
+information like temperatures, it will help to improve the forecasts.
 
 I have showed all the steps from model building to model assessments for just one
 time series. Would be any different if we have multiple time series?
@@ -829,20 +833,20 @@ class: middle center
 ]
 .card[
 ![](img/tsibble.png)
-[pkg.earo.me/tsibble](https://pkg.earo.me/tsibble)
+[**pkg.earo.me/tsibble**](https://pkg.earo.me/tsibble)
 ]
 .card[
 ![](img/fable.png)
-[github.com/tidyverts/fable](https://github.com/tidyverts/fable)
+[**github.com/tidyverts/fable**](https://github.com/tidyverts/fable)
 ]
 &lt;br&gt;
 .card[
 ![](img/slides-title.png)
-[slides.earo.me/rstudioconf19](https://slides.earo.me/rstudioconf19)
+[**slides.earo.me/rstudioconf19**](https://slides.earo.me/rstudioconf19)
 ]
 .card[
 ![](img/Octocat.png)
-[github.com/earowang/rstudioconf19](https://github.com/earowang/rstudioconf19)
+[**github.com/earowang/rstudioconf19**](https://github.com/earowang/rstudioconf19)
 ]
 
 ???
