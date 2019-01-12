@@ -373,7 +373,7 @@ stretch
 .pull-right[
 &lt;br&gt;
 &lt;img src="img/window.png"&gt;
-Type stability suffix: `*_dbl()`, `*_int()`, `*_lgl()`, `*_chr()`
+Type stability suffix: `*_dbl()`, `*_int()`, `*_lgl()`, `*_chr()`, `*_dfr()`, `*_dfc()`
 
 Parallel processing prefix: `future_*`.
 ]
@@ -383,7 +383,8 @@ Parallel processing prefix: `future_*`.
 Actually there are 3 different types of rolling operations: sliding, tiling,
 and stretching. It's just like purrr, `slide()` takes a single input, `slide2()` takes
 two inputs and `pslide()` for multiples. For the purpose of type stability,
-they are going to return a list. And in the recent version, I've added the
+they are going to return a list, and other variants include integers, characters
+and etc. And in the recent version, I've added the
 parallel support, they are all prefixed with `future_` by using the furrr package
 by Davis as a backend. If doing some rolling regression, it's nice to save some time by 
 rolling in parallel.
@@ -699,15 +700,15 @@ time series. Would be any different if we have multiple time series?
 
 
 ```
-#&gt; # A tsibble: 1,344 x 3 [1h] &lt;UTC&gt;
-#&gt; # Key:       customer_id [4]
+#&gt; # A tsibble: 491,182 x 3 [1h] &lt;UTC&gt;
+#&gt; # Key:       customer_id [1,480]
 #&gt;   customer_id datetime            general_supply_kwh
 #&gt;         &lt;int&gt; &lt;dttm&gt;                           &lt;dbl&gt;
-#&gt; 1     8302252 2013-01-01 00:00:00              0.446
-#&gt; 2     8302252 2013-01-01 01:00:00              0.419
-#&gt; 3     8302252 2013-01-01 02:00:00              0.322
-#&gt; 4     8302252 2013-01-01 03:00:00              0.25 
-#&gt; # … with 1,340 more rows
+#&gt; 1     8144977 2013-01-01 00:00:00              0.219
+#&gt; 2     8144977 2013-01-01 01:00:00              0.169
+#&gt; 3     8144977 2013-01-01 02:00:00              0.193
+#&gt; 4     8144977 2013-01-01 03:00:00              0.225
+#&gt; # … with 4.912e+05 more rows
 ```
 
 
@@ -726,14 +727,11 @@ series together. Especially the series have been defined when we created the
 tsibble. We are obviously interested in forecasting the demand for each household
 simultaneously.
 
-No additional steps needed. Just as what we did before, we can directly pipe 
+No extra steps needed. Just as what we did before, we can directly pipe 
 them into `model()`, and it will fit an ets model for each time series at once. 
 and then happy `forecast()`. It produces the forecast for each individual customer.
 I also do a log transformation to ensure I get positive forecasts back. The `forecast()`
 will do a back-transformation automatically.
-
-Models are scalable but my slides are not. So I just include 4 customers in the
-data.
 
 It is just as easy as 1, 2, 3 lines of code.
 
@@ -742,24 +740,36 @@ It is just as easy as 1, 2, 3 lines of code.
 ## Key is the 🔑 to link tsibble, mable and fable
 
 .pull-left[
-&lt;br&gt;
+.large[
 
 ```
-#&gt; # A mable: 4 x 2
-#&gt; # Key:     customer_id [4]
-#&gt;   customer_id ets         
-#&gt;         &lt;int&gt; &lt;model&gt;     
-#&gt; 1     8302252 &lt;ETS(A,N,A)&gt;
-#&gt; 2     8326358 &lt;ETS(A,N,A)&gt;
-#&gt; 3     8410172 &lt;ETS(A,N,A)&gt;
-#&gt; 4     8679054 &lt;ETS(A,N,A)&gt;
+#&gt; # A mable: 1,480 x 2
+#&gt; # Key:     customer_id [1480]
+#&gt;    customer_id ets         
+#&gt;          &lt;int&gt; &lt;model&gt;     
+#&gt;  1     8144977 &lt;ETS(A,N,A)&gt;
+#&gt;  2     8147121 &lt;ETS(A,N,A)&gt;
+#&gt;  3     8147611 &lt;ETS(A,N,N)&gt;
+#&gt;  4     8147619 &lt;ETS(A,N,A)&gt;
+#&gt;  5     8147667 &lt;ETS(A,N,N)&gt;
+#&gt;  6     8147703 &lt;ETS(A,N,N)&gt;
+#&gt;  7     8147725 &lt;ETS(A,N,N)&gt;
+#&gt;  8     8147769 &lt;ETS(A,N,A)&gt;
+#&gt;  9     8147795 &lt;ETS(A,N,A)&gt;
+#&gt; 10     8147803 &lt;ETS(A,N,N)&gt;
+#&gt; # … with 1,470 more rows
 ```
 ]
+]
 .pull-right[
+
 &lt;img src="figure/batch-plot-1.svg" style="display: block; margin: auto;" /&gt;
 ]
 
 ???
+
+Models are scalable but visualisation is not. So I just include 4 customers in the
+plot.
 
 ---
 

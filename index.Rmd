@@ -321,7 +321,7 @@ stretch
 .pull-right[
 <br>
 <img src="img/window.png">
-Type stability suffix: `*_dbl()`, `*_int()`, `*_lgl()`, `*_chr()`
+Type stability suffix: `*_dbl()`, `*_int()`, `*_lgl()`, `*_chr()`, `*_dfr()`, `*_dfc()`
 
 Parallel processing prefix: `future_*`.
 ]
@@ -331,7 +331,8 @@ Parallel processing prefix: `future_*`.
 Actually there are 3 different types of rolling operations: sliding, tiling,
 and stretching. It's just like purrr, `slide()` takes a single input, `slide2()` takes
 two inputs and `pslide()` for multiples. For the purpose of type stability,
-they are going to return a list. And in the recent version, I've added the
+they are going to return a list, and other variants include integers, characters
+and etc. And in the recent version, I've added the
 parallel support, they are all prefixed with `future_` by using the furrr package
 by Davis as a backend. If doing some rolling regression, it's nice to save some time by 
 rolling in parallel.
@@ -619,7 +620,7 @@ time series. Would be any different if we have multiple time series?
 ```{r subset}
 ```
 
-```{r batch, echo = TRUE}
+```{r batch, echo = TRUE, eval = FALSE}
 ```
 
 ???
@@ -631,14 +632,11 @@ series together. Especially the series have been defined when we created the
 tsibble. We are obviously interested in forecasting the demand for each household
 simultaneously.
 
-No additional steps needed. Just as what we did before, we can directly pipe 
+No extra steps needed. Just as what we did before, we can directly pipe 
 them into `model()`, and it will fit an ets model for each time series at once. 
 and then happy `forecast()`. It produces the forecast for each individual customer.
 I also do a log transformation to ensure I get positive forecasts back. The `forecast()`
 will do a back-transformation automatically.
-
-Models are scalable but my slides are not. So I just include 4 customers in the
-data.
 
 It is just as easy as 1, 2, 3 lines of code.
 
@@ -647,16 +645,22 @@ It is just as easy as 1, 2, 3 lines of code.
 ## Key is the `r emo::ji("key")` to link tsibble, mable and fable
 
 .pull-left[
-<br>
+.large[
 ```{r batch-model}
 ```
 ]
+]
 .pull-right[
+```{r batch-forecast}
+```
 ```{r batch-plot, fig.height = 13}
 ```
 ]
 
 ???
+
+Models are scalable but visualisation is not. So I just include 4 customers in the
+plot.
 
 ---
 

@@ -285,35 +285,50 @@ elec_jan31 %>%
   scale_colour_brewer(palette = "Dark2")
 
 ## ----- subset
-set.seed(20190105)
-sel_id <- has_gaps(elec_ts) %>% 
+all_id <- has_gaps(elec_ts) %>% 
   filter(!.gaps) %>% 
-  pull(customer_id) %>% 
-  sample(size = 5)
+  pull(customer_id)
 elec_sub <- elec_ts %>% 
-  filter(customer_id %in% sel_id) %>% 
+  filter(customer_id %in% all_id) %>% 
+  filter_index(~ "2013-01-14") %>% 
   group_by_key() %>% 
   index_by(datetime = floor_date(reading_datetime, "hour")) %>%
-  summarise(general_supply_kwh = sum(general_supply_kwh)) %>% 
-  filter_index(~ "2013-01-14") %>% 
+  summarise(general_supply_kwh = sum(general_supply_kwh))
+which_zero <- elec_sub %>% 
+  filter(general_supply_kwh == 0) %>% 
+  pull(customer_id) %>% 
+  unique()
+elec_sub <- elec_sub %>% 
+  filter(!(customer_id %in% which_zero)) %>% 
   print()
+
+## ---- batch-model
+elec_mbl <- elec_sub %>% 
+  model(ets = ETS(log(general_supply_kwh))) %>% 
+  print(n = 10)
+
+## ---- batch-forecast
+elec_fct <- elec_mbl %>% 
+  forecast(h = "1 day")
 
 ## ---- batch
 elec_fct <- elec_sub %>% 
   model(ets = ETS(log(general_supply_kwh))) %>% 
   forecast(h = "1 day")
 
-## ---- batch-model
-elec_sub %>% 
-  model(ets = ETS(log(general_supply_kwh)))
-
 ## ---- batch-plot
+set.seed(20190112)
+plot_id <- sample(unique(elec_sub$customer_id), size = 4)
+elec_ftf <- elec_fct %>% 
+  fortify() %>% 
+  filter(customer_id %in% plot_id)
 elec_sub %>% 
+  filter(customer_id %in% plot_id) %>% 
   ggplot(aes(x = datetime, y = general_supply_kwh)) +
   geom_line(size = 1.2) +
   geom_forecast(
     aes(ymin = lower, ymax = upper, level = level),
-    elec_fct, stat = "identity", size = 1.2
+    elec_ftf, stat = "identity", size = 1.2
   ) +
   facet_wrap(~ customer_id, scales = "free_y", ncol = 1, labeller = "label_both") +
   xlab("Reading time") +
