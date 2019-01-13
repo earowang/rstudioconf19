@@ -94,10 +94,13 @@ But why we cannot bring this workflow easily into time series?
 
 Because the current time series objects in R are model-focused. By saying model,
 I mean it not only includes statistical models, but also forecasting,
-decomposition, autocorrelation function, and etc. They require matrices. But 
+decomposition, autocorrelation function, and etc. All the methods expect matrices
+as inputs. But 
 the data arrives in the right beginning of this process, it rarely comes in the
 matrix form. We have to write so much ad hoc code get the data into a model-ready 
 time series object. It is a pain, bc of the mismatch
+
+I hope to change that.
 
 ---
 
@@ -112,11 +115,9 @@ The underlying data structure: [tsibble]()
 ???
 
 Some new tools are provided to streamline this workflow and make time series
-analysis a bit easier. The tsibble pkg will focus on
+analysis a bit easier and more fun. The tsibble pkg will focus on
 the tidy and transform part, the fable package will do time series modelling and
 forecasting. The visualisation is done with ggplot2 and its ext.
-
-I hope to make time series analysis more fun and intuitively.
 
 To make this workflow work, they're going to share the same underlying data
 str, which is a new data abstraction for time series.
@@ -177,11 +178,11 @@ tsibble.
 
 ???
 
-What makes time series different from a tibble? Bc it has its own semantics.
+What makes time series special or different from a tibble? Bc it has its own semantics.
 
 The first is obviously the index variable that represents time. In this case,
-it's `reading_datetime`. It supports a wide range of time classes, from numerics
-to nanotime, to even ordered factors. The second component is what we call "key". They are
+it's `reading_datetime`. Tsibble supports a wide range of time classes, from numerics
+to nanotime, and ordered factors. The second component is what we call "key". They are
 identifying variables that define series or entities over time. For this example,
 each household is a series and the key variable is `customer_id`.
 
@@ -205,10 +206,12 @@ Basically it means each customer has to have unique timestamps.
 
 ???
 
-Tibble gives a very nice printing and tsibble is going to enhance that by adding
+Now we have a tsibble.
+
+Tibble gives a very nice printing method and tsibble is going to enhance that by adding
 contextual information. Now we have a tsibble with its data dimensions. It
 recognises 30 min interval and the time zone associated with the index. Here we
-have UTC, so makes the life a bit easier.
+have UTC, but you might have time zones with DST.
 
 The key variable is reported with the number of series. We have 2,924 customers
 in this big table.
@@ -233,7 +236,7 @@ We have some time gaps in this data. They are implicit missing values. Since
 ggplot2 isn't aware of these gaps, it always draws a straight line between data
 segments. Tsibble comes with a handy function `fill_gaps()`. It's a simple call
 to fill in these gaps with `NA` by default or you can do by values or functions.
-So we can remove these lines from the plot.
+So these lines can be removed from the plot easily.
 
 ---
 
@@ -261,8 +264,9 @@ has_gaps(elec_ts)
 
 Except for `fill_gaps()`, tsibble provides other three verbs to handle implicit
 missing values. They are all suffixed by `_gaps()`. Nearly 20% of customers have
-time gaps. Almost all model functions require a complete series. So it's nice
-to fill in those time gaps at the first place.
+time gaps. The output shown here, you can see the last two customers have gaps.
+Almost all model functions require a complete series. So it's a good
+practice to look at and fill in those time gaps at the first place.
 
 ---
 
@@ -280,8 +284,8 @@ aggregated to any higher-level time resolutions.
 
 For example, I want to work with hourly data instead of 30 mins. Then I use
 `floor_date()`/`celling_date()`/`round_date()` from the lubridate pkg on the 
-index inside the `index_by()`, followed by `summarise()`. I'll get hourly 
-average electricity usage across all the households. The result is going to a 
+index variable inside the `index_by()`, followed by `summarise()`. I'll get hourly 
+average electricity usage across all the households. The result is going to be a 
 single time series at one hour interval.
 
 ---
@@ -328,7 +332,8 @@ Parallel processing prefix: `future_*`.
 
 Actually there are 3 different types of rolling operations: sliding, tiling,
 and stretching. It's just like purrr, `slide()` takes a single input, `slide2()` takes
-two inputs and `pslide()` for multiples. For the purpose of type stability,
+two inputs and `pslide()` for multiples. If you have a data frame to roll, you
+need to use `pslide()`. For the purpose of type stability,
 they are going to return a list, and other variants include integers, characters
 and etc. And in the recent version, I've added the
 parallel support, they are all prefixed with `future_` by using the furrr package
@@ -366,10 +371,11 @@ stretch_dbl(x, ~ mean(.),
 
 ???
 
-A simple example is rolling average. Again, it uses purrr-like syntax, by calling
-a function or a formula. I specify the window size to be 24 and it's rolling
-forward from left to right. If you want to move in an opposite direction, just
-change the window size to be negative.
+A simple example is rolling average. It uses purrr-like syntax. You can call
+a function name or an anonymous function using `~`. I specify the window size to be 
+24 (1 day) and it's rolling forward from left to right. If you want to move in an 
+opposite direction, just change the window size to be negative. These 3 rolling
+window as you can result in different averages.
 
 ---
 
@@ -390,9 +396,9 @@ elec_avg %>%
 ???
 
 A more advanced example, but extremely useful is rolling forecast. I defined
-a custom function called `expand_forecast()` and also enabled parallel processing
+a custom function called `expand_forecast()` and also enable parallel processing
 by using `future_pstretch()`. It's never been that easy to do a expanding forecast.
-A nice thing about functional programming, we can focus on expressions or actions,
+A nice thing about functional programming, we can focus on writing expressions,
 rather than wring a long for-loop statement. So what sort of code goes into the 
 `expand_forecast()`. This Q brings us to the next part of the presentation: 
 tidy forecasting.
@@ -410,7 +416,7 @@ class: inverse middle center
 
 How many of you have used the forecast package before?
 
-The fable is the tidy replacement of the forecast.
+The fable is the tidy replacement of the forecast package.
 
 ---
 
@@ -441,9 +447,11 @@ Why we call it fable?
 ???
 
 Let's look at the data in the first 30 days of January. Each facet gives
-a daily pattern of electricity demand. The peak in the late afternoon is primarily
+a daily snapshot of hourly electricity demand. The peak in the late afternoon is
 driven by the use of air conditioning. January is summer time in Australia. You
-can see some days have much higher usage, most likely they are very hot days.
+can see some days have much higher usage coloured by red, bc they are very hot 
+days with max temp greater than 32 degrees.
+
 I'm going to use this subset to forecast the demand one day ahead. And I hold 
 the data of Jan 31 as the test set.
 
@@ -495,11 +503,12 @@ of the value from the previous hour. If we don't specify the RHS like ets, it wi
 automatic model selection by picking up the best model for you.
 
 Now we have a mable back. A mable is a model table that contains model objects.
-It gives a succinct model representation by saying I have a seasonal naive
-model and an ets with certain components.
+Each cell shows a succinct model representation by saying I have a seasonal naive
+model and an ets with three selected components.
 
-The `model()` is an analogue of the `summarise()` semantics, because it also reduces the data
-down to a single summary but it happens to a model object of that summary.
+The `model()` is an analogue of `summarise()`, using the same semantics, 
+because it also reduces the data down to a single summary but it happens to be 
+a model object of that summary.
 
 Models are reduced representations of the data down to simplistic structures 
 that are described by coefficients.
@@ -517,10 +526,11 @@ that are described by coefficients.
 
 ???
 
-It's easy to extract parameter estimates, information criterion or residuals from
+To extract parameter estimates, information criterion or residuals from
 a mable. We just use the familiar broom functions: `tidy()`, `glance()` and `augment()`.
 By applying the `tidy()` function on the mable, we get the parameter estimates
-for the models we have.
+for the models we've built. We have got a bunch of parameters for ets like alpha,
+beta and level estimates.
 
 ---
 
@@ -545,15 +555,19 @@ elec_fbl <- elec_mbl %>%
 ???
 
 It's time to forecast. We pipe the mable into the `forecast()`, and we're doing
-a one-day-ahead forecast. It supports human-friendly input, by reading forecast
-horizon is 1 day instead of 24. It's convenient,
+a one-day-ahead forecast. It supports human-friendly input and reads more naturally
+with forecast horizon 1 day instead of `h = 24`. It's convenient,
 bc we no longer need to compute how many hours/minutes/seconds in a day.
 
 We're done with the forecast, we have a forecasting table, which is a fable. It's
 a special tsibble, which includes the future predications. It not only tells you
 the point forecasts, but also an underlying pred distribution that involves uncertainty.
 Bc we are forecasters, not fortune tellers.
-You can see the normal distribution with the mean and the standard deviation.
+
+You can see the normal distribution with the mean and the standard deviation in
+the last column.
+
+This is one of my favourite features about fable.
 
 ---
 
@@ -572,6 +586,8 @@ We'll see the forecasts more clearly with plots using `geom_forecast()`.
 
 The naive method repeats the yesterday's pattern, but the 80 and 95 PIs are quite 
 wide, and even goes below zero.
+
+How about ets?
 
 ---
 
@@ -603,10 +619,13 @@ The ets nicely captures the daily trend and produces a much narrower PI.
 
 Which model performs better?
 
-By looking at accuracy measures, ets does slightly better than naive. But they
-all tend to give underestimated predications. The blank line in the plot is
+Use `accaracy()` to compare the predications with the test set that I held before.
+
+Looking at accuracy measures, ets does slightly better than naive in terms of RMSE. 
+But they all tend to give underestimated predications. The blank line in the plot is
 the actual data. Looks like it's another hot day in January. If we have weather
-information like temperatures, it will help to improve the forecasts.
+information like temperatures, we can include them to improve the forecasts, but
+need to use a different model that allows for ex regressors.
 
 I have showed all the steps from model building to model assessments for just one
 time series. Would be any different if we have multiple time series?
@@ -623,20 +642,19 @@ time series. Would be any different if we have multiple time series?
 
 ???
 
-My answer is No. Bc models are fundamentally scalable.
+No. Bc models are fundamentally scalable.
 
 Tsibble as a modern reimaging of time series, it designs for hosting many time
 series together. Especially the series have been defined when we created the
 tsibble. We are obviously interested in forecasting the demand for each household
-simultaneously.
+here.
 
-No extra steps needed. Just as what we did before, we can directly pipe 
-them into `model()`, and it will fit an ets model for each time series at once. 
-and then happy `forecast()`. It produces the forecast for each individual customer.
-I also do a log transformation to ensure I get positive forecasts back. The `forecast()`
-will do a back-transformation automatically.
-
-It is just as easy as 1, 2, 3 lines of code.
+This is the subset, including 1480 series. There's no new steps needed. Just as 
+what we did before, we can directly pipe them into `model()`, and it will fit an 
+ets model for each time series at once. and then happy `forecast()`.
+I also take a log transformation on the response variable to ensure that I get
+positive forecasts back. The `forecast()` will take care of the back-transformation
+for you.
 
 ---
 
@@ -657,8 +675,12 @@ It is just as easy as 1, 2, 3 lines of code.
 
 ???
 
-Models are scalable but visualisation is not. So I just include 4 customers in the
-plot.
+You can see 1480 models have been fitted. The key variable is
+always the key to refer to a series across tsibble, mable and fable.
+
+Models are scalable but visualisation is not. So I just plot 4 customers with
+their forecasts here. At the individual levels, lots of noise, so PI are much
+larger as well.
 
 ---
 
@@ -671,29 +693,8 @@ plot.
 
 ???
 
-## Takeaways
-
-.div-middle[
-.pull-left[
-### 3 tibbles
-
-1. tsibble
-2. mable
-3. fable
-]
-
-.pull-right[
-### 3 steps
-
-```{r, eval = FALSE, echo = TRUE}
-as_tsibble() %>% 
-  model() %>% 
-  forecast()
-```
-
-Tidy time series workflow
-]
-]
+It's a proportion of what tsibble and fable can do. We've got decomposition,
+simulation based on model fits, interpolation and streaming data. So check it out.
 
 ---
 
@@ -749,5 +750,8 @@ class: middle center
 
 ???
 
-Useful links to these packages. I need to mention that the fable packages currently
-is on Github only.
+I have to mention that the fable packages currently is on Github only, but tsibble
+is on CRAN.
+
+These are the useful links to these packages, my slides and the source code behind
+the slides.

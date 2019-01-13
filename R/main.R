@@ -162,7 +162,7 @@ window_tbl %>%
   group_by(type) %>% 
   gt() %>% 
   tab_style(
-    style = cells_styles( text_font = "Monospace"),
+    style = cells_styles(text_font = "Monospace"),
     locations = cells_data()
   )
 
@@ -201,10 +201,17 @@ elec_jan31 <- elec_avg %>%
   filter_index("2013-01-31")
 
 ## ---- calendar-train
+weather <- read_rds("~/Research/paper-tsibble/data/weather13.rds") %>% 
+  mutate(hot = if_else(max_temp >= 32, "Hot", "Not hot"))
 elec_jan %>% 
-  ggplot(aes(x = hour, y = avg_kwh)) +
+  left_join(weather, by = "date") %>% 
+  ggplot(aes(x = hour, y = avg_kwh, colour = hot)) +
   geom_line(size = 1.2) +
   sugrrants::facet_calendar(~ date) +
+  scale_colour_manual(
+    values = c("Hot" = "#de2d26", "Not hot" = "#000000"),
+    guide = guides(colour = "none")
+  ) +
   theme_remark()
 
 ## ----- model
