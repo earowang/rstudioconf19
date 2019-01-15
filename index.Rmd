@@ -714,7 +714,7 @@ Rob J Hyndman <br>
 <i class='fab fa-twitter' style='color:#6CADDE'></i> [@robjhyndman](http://twitter.com/robjhyndman)
 ]
 .portrait[
-![](https://d33wubrfki0l68.cloudfront.net/362995d299699959fe385c344e24331f9c0b256c/ecdb4/img/circle.jpg)
+![](https://mitchelloharawild.com/img/circle.jpg)
 Mitchell O'Hara‑Wild <br>
 <i class='fab fa-twitter' style='color:#6CADDE'></i> [@mitchoharawild](http://twitter.com/mitchoharawild)
 ]
