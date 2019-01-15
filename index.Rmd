@@ -54,7 +54,7 @@ read_chunk('R/main.R')
 ???
 
 I want to talk about one streamlined workflow for ts under the tidyverse framework,
-using 2 packages. I'll explain three big ideas behind these 2 pkgs: they are
+using 2 packages. I'll introduce you three big ideas behind these 2 pkgs: they are
 tsibble, mable and fable and how they link together. I hope to explain them 
 concretely with data examples.
 
@@ -158,7 +158,7 @@ Now we're going to have some fun with an open dataset. This dataset is about res
 electricity consumption in Australia. It's a tibble with 46M obs and 8 variables.
 The column `customer_id` includes unique identifiers for each household;
 thousands of households in this data. And `reading_datetime` gives the 
-timestamps when the reading is recorded basically every 30 mins. `general_supply` is the 
+timestamps when the reading is recorded every 30 mins. `general_supply` is the 
 variable that we're interested in forecasting. There are some other 
 measurements in the table as well. How are we going to turn this data into a
 tsibble.
@@ -234,9 +234,9 @@ elec_ts %>% fill_gaps()
 
 We have some time gaps in this data. They are implicit missing values. Since
 ggplot2 isn't aware of these gaps, it always draws a straight line between data
-segments. Tsibble comes with a handy function `fill_gaps()`. It's a simple call
-to fill in these gaps with `NA` by default or you can do by values or functions.
-So these lines can be removed from the plot easily.
+segments. Tsibble comes with a handy function `fill_gaps()`. It fills in these 
+gaps with `NA` by default or you can do by values or functions.
+So these lines can be removed from the plot easily with `fill_gaps()`.
 
 ---
 
@@ -255,7 +255,7 @@ So these lines can be removed from the plot easily.
 ```r
 has_gaps(elec_ts)
 ```
-```{r has-gaps}
+```{r has-gaps, highlight.output = 12:13}
 ```
 ]
 ]
@@ -264,7 +264,7 @@ has_gaps(elec_ts)
 
 Except for `fill_gaps()`, tsibble provides other three verbs to handle implicit
 missing values. They are all suffixed by `_gaps()`. Nearly 20% of customers have
-time gaps. The output shown here, you can see the last two customers have gaps.
+time gaps. The output shown here, you can see the last two customers with gaps.
 Almost all model functions require a complete series. So it's a good
 practice to look at and fill in those time gaps at the first place.
 
@@ -658,7 +658,7 @@ for you.
 
 ---
 
-## Key is the `r emo::ji("key")` to link tsibble, mable and fable
+## Key is the `r emo::ji("key")` to unlock series across tsibble, mable and fable
 
 .pull-left[
 .large[
@@ -679,8 +679,8 @@ You can see 1480 models have been fitted. The key variable is
 always the key to refer to a series across tsibble, mable and fable.
 
 Models are scalable but visualisation is not. So I just plot 4 customers with
-their forecasts here. At the individual levels, lots of noise, so PI are much
-larger as well.
+their forecasts here. At the individual levels, lots of noise, and much larger PI
+as well.
 
 ---
 
@@ -693,8 +693,9 @@ larger as well.
 
 ???
 
-It's a proportion of what tsibble and fable can do. We've got decomposition,
-simulation based on model fits, interpolation and streaming data. So check it out.
+I've showed a proportion of what tsibble and fable can do. We've got decomposition,
+simulation based on model fits, interpolation and model supports for streaming data.
+So check them out.
 
 ---
 
@@ -750,7 +751,7 @@ class: middle center
 
 ???
 
-I have to mention that the fable packages currently is on Github only, but tsibble
+I have to mention that the tsibble is on CRAN but fable is on Github atm.
 is on CRAN.
 
 These are the useful links to these packages, my slides and the source code behind
