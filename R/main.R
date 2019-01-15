@@ -92,6 +92,7 @@ elec_slide_mean <- ggplot() +
   geom_line(aes(x = datetime, y = ma_kwh24), data = elec_slide_revealed, size = 1.2, colour = "#de2d26") +
   xlab("Time") +
   ylab("Average kwH") +
+  ylim(c(0, max(elec_jan$avg_kwh))) +
   theme_bw() +
   transition_manual(group)
 anim_save("img/slide-mean.gif", elec_slide_mean, width = 800, height = 250)
