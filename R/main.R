@@ -258,7 +258,7 @@ elec_jan %>%
 ## ----- model
 elec_mbl <- elec_jan %>% 
   model(
-    yesterday = NAIVE(avg_kwh ~ lag("1 day")), 
+    yesterday = NAIVE(avg_kwh ~ lag("1 day")),
     ets = ETS(avg_kwh)
   ) %>%
   print()
