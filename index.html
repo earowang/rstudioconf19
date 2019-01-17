@@ -67,7 +67,7 @@ I believe this diagram isn't foreign to you. This is the tidyverse model.
 Each module here is powered by one of the tidyverse packages. The tidyverse 
 plays nicely with each other. And one of the fundamental reasons is 
 they all share the same underlying data structure, which is data frame or tibble. 
-So the diagram actually places the data in the center.
+So the data is actually placed in the center of the diagram.
 
 But why we cannot bring this workflow easily into time series?
 
@@ -176,7 +176,8 @@ tsibble.
 ```r
 elec_ts &lt;- elec_tbl %&gt;% 
   as_tsibble(
-    key = id(customer_id), index = reading_datetime
+    index = reading_datetime,
+    key = id(customer_id),
   )
 ```
 
@@ -590,11 +591,11 @@ a model object of that summary.
 
 ???
 
-To look at parameter estimates, information criterion or residuals from
+In order to look at parameter estimates, information criterion or residuals from
 a mable. We just use the familiar broom functions: `tidy()`, `glance()` and `augment()`.
 By applying the `tidy()` function on the mable, we get the parameter estimates
 for the models we've built. We have got a bunch of parameters for ets like 
-smoothing parameters alpha &amp; beta and initial level estimates.
+alpha &amp; beta and initial level estimates.
 
 ---
 
@@ -630,10 +631,10 @@ elec_fbl &lt;- elec_mbl %&gt;%
 ???
 
 It's time to forecast. We pipe the mable into the `forecast()`, and we're doing
-a one-day-ahead forecast or 24-step-ahead. It supports human-friendly input and 
+a one-day-ahead forecast equivalent to 24-step-ahead. It supports human-friendly input and 
 so we can read more naturally with forecast horizon 1 day. It's convenient,
-bc we no longer need to compute how many hours/minutes/seconds in a day. But you
-can still do `h = 24`.
+bc we no longer need to mentally compute how many hours/minutes/seconds in a day. 
+But you can still do `h = 24`.
 
 We're done with the forecast, we have a forecasting table, which is a fable. It's
 a special tsibble, which includes the future predications. It not only tells you
@@ -643,7 +644,8 @@ Bc we are forecasters, not fortune tellers.
 You can see the normal distribution with the mean and the standard deviation in
 the last column `.distribution`.
 
-This is one of my favourite features about fable.
+This is one of my favourite features about fable: reporting distribution forecasting.
+So you're able to produce any level of predication interval you like.
 
 ---
 
@@ -708,10 +710,10 @@ Looking at accuracy measures, ets does slightly better than naive in terms of RM
 But they all tend to give underestimated predications. The blank line in the plot is
 the actual data. Looks like it's another hot day in January. If we have weather
 information like temperatures, we can include them to improve the forecasts, but
-need to use a different model that allows for ex regressors, like ARIMA.
+need to use a different model that allows for ex regressors, e.g. ARIMA.
 
 So far, I have showed all the steps from model building to model assessments for just one
-time series. Would be any different if we have multiple time series?
+time series. Would be any different if we have multiple time series in a table?
 
 ---
 
@@ -746,8 +748,8 @@ series together. Especially the series have already been defined when we created
 tsibble. We are obviously interested in forecasting the demand for each household
 here.
 
-This is the subset, including 1480 series. There's no extra steps needed. Just as 
-what we did before, we can directly pipe them into `model()`, and it will fit an 
+This is the subset, including 1480 households. No extra steps needed for forecasting. 
+Just as what we did before, we can directly pipe them into `model()`, and it will fit an 
 ets model for each time series at once. and then happy `forecast()`.
 I also take a log transformation on the response variable to ensure that I get
 positive forecasts back. The `forecast()` will take care of the back-transformation
@@ -786,7 +788,7 @@ for you.
 
 ???
 
-You can see 1480 models have been fitted. The key variable is
+You can see 1480 models have been fitted in the mable. The key variable is
 always the key to refer to a series across tsibble, mable and fable. 
 
 We do not store historical data in model objects and fable.
@@ -864,7 +866,7 @@ class: middle center
 
 ???
 
-I have to mention that the tsibble is on CRAN but fable is on Github atm. They
+I need to mention that the tsibble is on CRAN but fable is on Github atm. They
 belong to tidyverts.org
 
 These are the useful links to these packages, my slides and the source code behind
