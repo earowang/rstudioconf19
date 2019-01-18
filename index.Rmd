@@ -56,7 +56,7 @@ read_chunk('R/main.R')
 I want to talk about one streamlined workflow for ts under the tidyverse framework,
 using 2 packages. I'll introduce you three big ideas behind these 2 pkgs: they are
 tsibble, mable and fable and how they link together. I hope to explain them 
-concretely with data examples.
+concretely with data stories.
 
 ---
 
@@ -72,7 +72,7 @@ The underlying data structure: [tibble]()
 
 I believe this diagram isn't foreign to you. This is the tidyverse model.
 Each module here is powered by one of the tidyverse packages. The tidyverse 
-plays nicely with each other. And one of the fundamental reasons is 
+plays seamlessly with each other. And one of the fundamental reasons is 
 they all share the same underlying data structure, which is data frame or tibble. 
 So the data is actually placed in the center of the diagram.
 
@@ -94,8 +94,8 @@ But why we cannot bring this workflow easily into time series?
 
 Because the current time series objects in R are model-focused. By saying model,
 I mean it not only includes statistical models, but also forecasting,
-decomposition, autocorrelation function, and etc. All the methods expect matrices
-as inputs. But 
+decomposition, autocorrelation function, and other time series tools. All the 
+methods expect matrices as inputs. But 
 the data arrives in the right beginning of this process, it rarely comes in the
 matrix form. We have to write so much ad hoc code get the data into a model-ready 
 time series object. It is a pain, bc of the mismatch
@@ -115,7 +115,7 @@ The underlying data structure: [tsibble]()
 ???
 
 Some new tools are provided to streamline this workflow and make time series
-analysis a bit easier and more fun. The tsibble pkg will focus on
+analysis a bit easier and more fun, more intuitively. The tsibble pkg will focus on
 the tidy and transform part, the fable package will do time series modelling and
 forecasting. The visualisation is done with ggplot2 and its ext.
 
@@ -182,10 +182,10 @@ What makes time series special or different from a tibble? Bc it has its own sem
 
 The first is obviously the index variable that represents time. In this case,
 it's `reading_datetime`. Tsibble supports a wide range of time classes, from numerics
-to nanotime, and ordered factors. The second component is what we call "key". They are
+to date-times, to nanotime. The second component is what we call "key". They are
 identifying variables that define series or entities over time. For this example,
-each household is a series and the key variable is `customer_id`. The key can
-include multiple variables too.
+each household is a series and the key variable is `customer_id`. You can also include 
+multiple variables in the key.
 
 Index defines the time and key defines the series.
 
@@ -213,7 +213,7 @@ Tibble gives a very nice printing method and tsibble is going to enhance that by
 contextual information. Now we have a tsibble with its data dimensions. It
 recognises 30 min interval and the time zone associated with the index. Here we
 have UTC, but you might have time zones with DST. Tsibble will respect any time
-zone.
+zone in the data.
 
 The key variable is reported with the number of series. We have 2,924 customers
 in this big table.
@@ -528,7 +528,7 @@ a model object of that summary.
 ???
 
 In order to look at parameter estimates, information criterion or residuals from
-a mable. We just use the familiar broom functions: `tidy()`, `glance()` and `augment()`.
+model objects. We just use the familiar broom functions: `tidy()`, `glance()` and `augment()`.
 By applying the `tidy()` function on the mable, we get the parameter estimates
 for the models we've built. We have got a bunch of parameters for ets like 
 alpha & beta and initial level estimates.
@@ -557,7 +557,7 @@ elec_fbl <- elec_mbl %>%
 
 It's time to forecast. We pipe the mable into the `forecast()`, and we're doing
 a one-day-ahead forecast equivalent to 24-step-ahead. It supports human-friendly input and 
-so we can read more naturally with forecast horizon 1 day. It's convenient,
+so we can read more naturally forecasting with 1 day horizon. It's convenient,
 bc we no longer need to mentally compute how many hours/minutes/seconds in a day. 
 But you can still do `h = 24`.
 
@@ -569,7 +569,7 @@ Bc we are forecasters, not fortune tellers.
 You can see the normal distribution with the mean and the standard deviation in
 the last column `.distribution`.
 
-This is one of my favourite features about fable: reporting distribution forecasting.
+This is one of my favourite features about fable: reporting distribution forecasts.
 So you're able to produce any level of predication interval you like.
 
 ---
@@ -652,9 +652,10 @@ series together. Especially the series have already been defined when we created
 tsibble. We are obviously interested in forecasting the demand for each household
 here.
 
-This is the subset, including 1480 households. No extra steps needed for forecasting. 
+I've removed some troublesome series, ended up with 1480 households. 
+No extra steps needed for forecasting at scale. 
 Just as what we did before, we can directly pipe them into `model()`, and it will fit an 
-ets model for each time series at once. and then happy `forecast()`.
+ets model for each customer at once. and then happy `forecast()`.
 I also take a log transformation on the response variable to ensure that I get
 positive forecasts back. The `forecast()` will take care of the back-transformation
 for you.
@@ -684,8 +685,8 @@ always the key to refer to a series across tsibble, mable and fable.
 We do not store historical data in model objects and fable.
 
 Models are scalable but visualisation is not. So I just plot 4 customers with
-their forecasts here. At the individual levels, lots of noise, and much larger PI
-as well.
+their forecasts here. At the individual levels, lots of noise, producing much 
+larger PI as well.
 
 ---
 
